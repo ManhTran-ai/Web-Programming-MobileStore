@@ -40,7 +40,7 @@
             <version>${jakarta.servlet.jsp.version}</version>
             <scope>provided</scope>
         </dependency>
-
+      
         <!-- Jakarta JSTL -->
         <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>
