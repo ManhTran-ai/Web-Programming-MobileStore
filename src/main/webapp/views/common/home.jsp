@@ -22,7 +22,7 @@
         }
         
         .header {
-            background: linear-gradient(135deg, #cc2e2e 0%, #3c21ad 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 1rem 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -61,7 +61,7 @@
         }
         
         .hero {
-            background: linear-gradient(135deg, #cc2e2e 0%, #3c21ad 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 4rem 0;
             text-align: center;
@@ -81,7 +81,7 @@
             display: inline-block;
             padding: 12px 30px;
             background: white;
-            color: #4d2ecc;
+            color: #667eea;
             text-decoration: none;
             border-radius: 5px;
             font-weight: bold;
@@ -135,7 +135,7 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <div class="logo"> Mo🐝 Store</div>
+                <div class="logo">📱 Mobile Store</div>
                 <nav class="nav">
                     <a href="${pageContext.request.contextPath}/">Trang Chủ</a>
                     <a href="${pageContext.request.contextPath}/products">Sản Phẩm</a>
