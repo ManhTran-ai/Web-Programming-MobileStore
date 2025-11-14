@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -140,11 +140,19 @@
                     <a href="${pageContext.request.contextPath}/">Trang Chủ</a>
                     <a href="${pageContext.request.contextPath}/products">Sản Phẩm</a>
                     <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng</a>
-                    <a href="${pageContext.request.contextPath}/auth/login">Đăng Nhập</a>
+                    <a href="${pageContext.request.contextPath}/login">Đăng Nhập</a>
                 </nav>
             </div>
         </div>
     </header>
+
+    <!-- Flash Success Message -->
+    <c:if test="${not empty sessionScope.flashSuccess}">
+        <div style="max-width:1200px;margin:16px auto;padding:12px 16px;background:#ecfdf5;color:#065f46;border:1px solid #10b981;border-radius:8px;">
+            ${sessionScope.flashSuccess}
+        </div>
+        <c:remove var="flashSuccess" scope="session"/>
+    </c:if>
 
     <!-- Hero Section -->
     <section class="hero">
