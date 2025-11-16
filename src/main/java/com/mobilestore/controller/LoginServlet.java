@@ -1,4 +1,4 @@
-package com.mobilestore.web;
+package com.mobilestore.controller;
 
 import com.mobilestore.entity.User;
 import com.mobilestore.service.AuthService;
@@ -35,3 +35,4 @@ public class LoginServlet extends HttpServlet {
         }
     }
 }
+

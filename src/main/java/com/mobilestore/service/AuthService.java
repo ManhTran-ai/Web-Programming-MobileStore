@@ -1,16 +1,19 @@
 package com.mobilestore.service;
 
 import com.mobilestore.entity.User;
-import com.mobilestore.repository.UserRepository;
-import org.mindrot.jbcrypt.BCrypt;
+import com.mobilestore.dao.UserDAO;
+import com.mobilestore.util.PasswordUtil;
 
 public class AuthService {
-    private final UserRepository userRepository = new UserRepository();
+    private final UserDAO userDAO = new UserDAO();
 
     public User authenticate(String username, String passwordPlain) {
-        User user = userRepository.findByUsername(username);
-        if (user == null) return null;
-        boolean matches = passwordPlain.equals(user.getPassword()) ;
+        User user = userDAO.findByUsername(username);
+        if (user == null)
+            return null;
+
+        // Sử dụng BCrypt để verify mật khẩu
+        boolean matches = PasswordUtil.verifyPassword(passwordPlain, user.getPassword());
         return matches ? user : null;
     }
 }
