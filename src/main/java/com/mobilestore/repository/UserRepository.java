@@ -1,20 +1,29 @@
 package com.mobilestore.repository;
 
+import com.mobilestore.dao.UserDAO;
 import com.mobilestore.entity.User;
-import com.mobilestore.util.JPAUtil;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
+
+/**
+ * Repository class cho User - sử dụng JDBC thông qua UserDAO
+ */
 public class UserRepository {
+    private final UserDAO userDAO = new UserDAO();
+    
+    /**
+     * Tìm user theo username
+     * @param username Username cần tìm
+     * @return User object nếu tìm thấy, null nếu không
+     */
     public User findByUsername(String username) {
-        EntityManager em = JPAUtil.getEntityManager();
-        try {
-            return em.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
-                    .setParameter("username", username)
-                    .getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        } finally {
-            em.close();
-        }
+        return userDAO.findByUsername(username);
+    }
+    
+    /**
+     * Tìm user theo ID
+     * @param id ID của user
+     * @return User object nếu tìm thấy, null nếu không
+     */
+    public User findById(Integer id) {
+        return userDAO.findById(id);
     }
 }
