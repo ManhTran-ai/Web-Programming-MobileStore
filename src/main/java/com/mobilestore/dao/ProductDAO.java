@@ -130,6 +130,54 @@ public class ProductDAO {
     }
     
     /**
+     * Đếm tổng số sản phẩm
+     */
+    public int countAll() {
+        String sql = "SELECT COUNT(*) AS total FROM products";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi đếm products: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Lấy trang sản phẩm (offset, limit) sắp xếp giảm dần theo product_id
+     */
+    public List<Product> findPage(int offset, int limit) {
+        List<Product> products = new ArrayList<>();
+        String sql = "SELECT p.product_id, p.product_name, p.manufacturer, p.product_condition, " +
+                     "p.price, p.image, p.product_info, p.quantity_in_stock, p.category_id, " +
+                     "c.category_name " +
+                     "FROM products p " +
+                     "LEFT JOIN categories c ON p.category_id = c.category_id " +
+                     "ORDER BY p.product_id DESC " +
+                     "LIMIT ? OFFSET ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ps.setInt(2, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    products.add(mapResultSetToProduct(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi lấy trang products: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return products;
+    }
+    
+    /**
      * Tạo product mới
      */
     public Product create(Product product) {
@@ -147,8 +195,13 @@ public class ProductDAO {
             ps.setString(5, product.getImage());
             ps.setString(6, product.getProductInfo());
             ps.setInt(7, product.getQuantityInStock());
-            ps.setInt(8, product.getCategory() != null ? product.getCategory().getId() : null);
-            
+            // Fix: Sử dụng setObject thay vì setInt để hỗ trợ null value
+            if (product.getCategory() != null && product.getCategory().getId() != null) {
+                ps.setInt(8, product.getCategory().getId());
+            } else {
+                ps.setNull(8, java.sql.Types.INTEGER);
+            }
+
             int affectedRows = ps.executeUpdate();
             
             if (affectedRows > 0) {
@@ -184,7 +237,12 @@ public class ProductDAO {
             ps.setString(5, product.getImage());
             ps.setString(6, product.getProductInfo());
             ps.setInt(7, product.getQuantityInStock());
-            ps.setInt(8, product.getCategory() != null ? product.getCategory().getId() : null);
+            // Fix: Sử dụng setNull thay vì setInt để hỗ trợ null value
+            if (product.getCategory() != null && product.getCategory().getId() != null) {
+                ps.setInt(8, product.getCategory().getId());
+            } else {
+                ps.setNull(8, java.sql.Types.INTEGER);
+            }
             ps.setInt(9, product.getId());
             
             int affectedRows = ps.executeUpdate();
@@ -213,6 +271,43 @@ public class ProductDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * Tìm product theo bộ khóa duy nhất (product_name, manufacturer, product_condition, category_id)
+     * Trả về product nếu tồn tại, null nếu không tồn tại
+     */
+    public Product findByUniqueKey(String productName, String manufacturer, String productCondition, Integer categoryId) {
+        StringBuilder sql = new StringBuilder("SELECT p.product_id, p.product_name, p.manufacturer, p.product_condition, ")
+                .append("p.price, p.image, p.product_info, p.quantity_in_stock, p.category_id, c.category_name ")
+                .append("FROM products p LEFT JOIN categories c ON p.category_id = c.category_id WHERE p.product_name = ? AND p.manufacturer = ? AND p.product_condition = ? ");
+
+        if (categoryId == null) {
+            sql.append("AND p.category_id IS NULL");
+        } else {
+            sql.append("AND p.category_id = ?");
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            ps.setString(1, productName);
+            ps.setString(2, manufacturer);
+            ps.setString(3, productCondition);
+            if (categoryId != null) {
+                ps.setInt(4, categoryId);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToProduct(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm product theo unique key: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
     
     /**
