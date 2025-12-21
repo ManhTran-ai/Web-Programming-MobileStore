@@ -293,8 +293,19 @@
                     <a href="${pageContext.request.contextPath}/">Trang Chủ</a>
                     <a href="${pageContext.request.contextPath}/products">Sản Phẩm</a>
                     <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng</a>
-                    <a href="${pageContext.request.contextPath}/register">Đăng Ký</a>
-                    <a href="${pageContext.request.contextPath}/login">Đăng Nhập</a>
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.user}">
+                            <c:if test="${sessionScope.user.role.name == 'ADMIN'}">
+                                <a href="${pageContext.request.contextPath}/admin/products" style="color: #0071e3;">Admin Panel</a>
+                            </c:if>
+                            <span style="color: #888;">Xin chào, ${sessionScope.user.username}</span>
+                            <a href="${pageContext.request.contextPath}/logout">Đăng Xuất</a>
+                        </c:when>
+                        <c:otherwise>
+                            <a href="${pageContext.request.contextPath}/register">Đăng Ký</a>
+                            <a href="${pageContext.request.contextPath}/login">Đăng Nhập</a>
+                        </c:otherwise>
+                    </c:choose>
                 </nav>
             </div>
         </div>

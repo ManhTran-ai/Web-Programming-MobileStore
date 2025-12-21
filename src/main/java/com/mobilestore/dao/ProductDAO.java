@@ -147,8 +147,13 @@ public class ProductDAO {
             ps.setString(5, product.getImage());
             ps.setString(6, product.getProductInfo());
             ps.setInt(7, product.getQuantityInStock());
-            ps.setInt(8, product.getCategory() != null ? product.getCategory().getId() : null);
-            
+            // Fix: Sử dụng setObject thay vì setInt để hỗ trợ null value
+            if (product.getCategory() != null && product.getCategory().getId() != null) {
+                ps.setInt(8, product.getCategory().getId());
+            } else {
+                ps.setNull(8, java.sql.Types.INTEGER);
+            }
+
             int affectedRows = ps.executeUpdate();
             
             if (affectedRows > 0) {
@@ -184,7 +189,12 @@ public class ProductDAO {
             ps.setString(5, product.getImage());
             ps.setString(6, product.getProductInfo());
             ps.setInt(7, product.getQuantityInStock());
-            ps.setInt(8, product.getCategory() != null ? product.getCategory().getId() : null);
+            // Fix: Sử dụng setNull thay vì setInt để hỗ trợ null value
+            if (product.getCategory() != null && product.getCategory().getId() != null) {
+                ps.setInt(8, product.getCategory().getId());
+            } else {
+                ps.setNull(8, java.sql.Types.INTEGER);
+            }
             ps.setInt(9, product.getId());
             
             int affectedRows = ps.executeUpdate();
