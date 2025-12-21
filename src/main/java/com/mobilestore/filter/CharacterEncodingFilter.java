@@ -29,6 +29,23 @@ public class CharacterEncodingFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         
+        // Kiểm tra nếu là static resource thì bỏ qua filter
+        if (request instanceof jakarta.servlet.http.HttpServletRequest) {
+            jakarta.servlet.http.HttpServletRequest httpRequest = (jakarta.servlet.http.HttpServletRequest) request;
+            String path = httpRequest.getRequestURI();
+            
+            // Bỏ qua static resources (images, css, js, fonts, etc.)
+            if (path.startsWith("/images/") || 
+                path.startsWith("/css/") || 
+                path.startsWith("/js/") ||
+                path.startsWith("/assets/") ||
+                path.startsWith("/fonts/") ||
+                path.contains(".") && !path.endsWith(".jsp") && !path.endsWith(".html")) {
+                chain.doFilter(request, response);
+                return;
+            }
+        }
+        
         // Thiết lập encoding cho request
         request.setCharacterEncoding(encoding);
         
