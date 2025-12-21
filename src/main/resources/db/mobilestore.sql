@@ -1,3 +1,5 @@
+CREATE DATABASE  IF NOT EXISTS `mobilestore` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `mobilestore`;
 -- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: 127.0.0.1    Database: mobilestore
@@ -55,7 +57,7 @@ CREATE TABLE `categories` (
   `category_id` int NOT NULL AUTO_INCREMENT,
   `category_name` varchar(255) NOT NULL,
   PRIMARY KEY (`category_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -64,6 +66,7 @@ CREATE TABLE `categories` (
 
 LOCK TABLES `categories` WRITE;
 /*!40000 ALTER TABLE `categories` DISABLE KEYS */;
+INSERT INTO `categories` VALUES (1,'mobile'),(2,'tablet');
 /*!40000 ALTER TABLE `categories` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -169,7 +172,7 @@ CREATE TABLE `products` (
   PRIMARY KEY (`product_id`),
   KEY `FKog2rp4qthbtt2lfyhfo32lsw9` (`category_id`),
   CONSTRAINT `FKog2rp4qthbtt2lfyhfo32lsw9` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -178,6 +181,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
+INSERT INTO `products` VALUES (1,'images/products/ac1986ad-dd57-4917-a12c-691bedeab194.png','APPLE',30000000,'IPHONE 15 PRO','Mới','',22,1),(5,'images/products/177547fb-d043-4c42-a1a3-2f52c1355b63.webp','APPLE',100000000,'IPAB MINI 6','Mới','',10,2);
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -248,7 +252,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `UKr43af9ap4edm43mmtq01oddj6` (`username`),
   KEY `FK6e7f1kfvvn2k48olww485qvo3` (`role_name`),
   CONSTRAINT `FK6e7f1kfvvn2k48olww485qvo3` FOREIGN KEY (`role_name`) REFERENCES `roles` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -257,7 +261,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (2,'$2a$10$FYXBZKdE/4e1M5vUiBuRwu6SpPgmz75lpe02aw0p.gQdrGgbPnMc6','admin','ADMIN'),(3,'$2a$10$czJykfpeXDEs0fTZzhwl1.rofjjkQBMJLShWU0qhEpXmC4n3L8R.W','Mạnh Trần','CUSTOMER');
+INSERT INTO `users` VALUES (2,'$2a$10$FYXBZKdE/4e1M5vUiBuRwu6SpPgmz75lpe02aw0p.gQdrGgbPnMc6','admin','ADMIN'),(3,'$2a$10$czJykfpeXDEs0fTZzhwl1.rofjjkQBMJLShWU0qhEpXmC4n3L8R.W','Mạnh Trần','CUSTOMER'),(4,'12345678','tai','CUSTOMER'),(5,'$2a$10$342ro1UObsU/8YP0Dy1HNOQ92Fxy3hYI/KLTc0ygh7j5Q6NyeIyP6','levantai','ADMIN');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -270,4 +274,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-11 23:06:45
+-- Dump completed on 2025-12-21 22:11:49
