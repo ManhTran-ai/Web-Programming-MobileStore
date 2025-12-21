@@ -4,49 +4,121 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background-color: #f5f5f5;
+            color: #1a1a1a;
+            background-color: #ffffff;
         }
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: #1a1a1a;
+            border-bottom: none;
+            padding: 1.25rem 0;
         }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
         .header-content { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 1.8rem; font-weight: bold; }
-        .nav { display: flex; gap: 2rem; }
-        .nav a { color: white; text-decoration: none; transition: opacity 0.3s; }
-        .nav a:hover { opacity: 0.8; }
+        .logo { font-size: 1.5rem; font-weight: 600; color: #ffffff; letter-spacing: -0.5px; }
+        .nav { display: flex; gap: 2rem; align-items: center; }
+        .nav a { color: #ffffff; text-decoration: none; font-size: 0.95rem; font-weight: 400; transition: opacity 0.2s; }
+        .nav a:hover { opacity: 0.7; }
 
-        .page { padding: 3rem 0; }
+        .page { padding: 4rem 0; min-height: calc(100vh - 200px); }
         .center { max-width: 420px; margin: 0 auto; }
         .card {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: #ffffff;
+            padding: 3rem 2.5rem;
+            border-radius: 12px;
+            border: 1px solid #e5e5e5;
         }
-        h2 { margin-bottom: 1rem; text-align: center; color: #111827; }
-        .field { margin-bottom: 1rem; }
-        label { display:block; margin-bottom: 6px; color:#374151; font-weight: 600; }
-        input { width:100%; padding:12px 14px; border:1px solid #d1d5db; border-radius:8px; }
-        input:focus { outline: none; border-color: #667eea; }
-        .btn { display:block; width:100%; padding:12px 16px; background:#667eea; color:#fff; text-align:center; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition: transform .2s; }
-        .btn:hover { transform: translateY(-1px); }
-        .error { color:#b91c1c; margin-bottom: 12px; background:#fee2e2; border:1px solid #fecaca; padding:10px 12px; border-radius:8px; }
-        .success { color:#065f46; margin-bottom: 12px; background:#d1fae5; border:1px solid #a7f3d0; padding:10px 12px; border-radius:8px; }
-        .helper { margin-top: 12px; text-align: center; }
-        .helper a { color:#667eea; text-decoration: none; }
-        .helper a:hover { text-decoration: underline; }
-        .password-hint { font-size: 0.875rem; color: #6b7280; margin-top: 4px; }
+        h2 { 
+            margin-bottom: 2rem; 
+            text-align: center; 
+            color: #1a1a1a; 
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        .field { margin-bottom: 1.5rem; }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            color: #1a1a1a; 
+            font-weight: 500; 
+            font-size: 0.95rem;
+        }
+        input { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 1px solid #e5e5e5; 
+            border-radius: 8px; 
+            font-size: 0.95rem;
+            color: #1a1a1a;
+            background: #ffffff;
+            transition: border-color 0.2s;
+        }
+        input:focus { 
+            outline: none; 
+            border-color: #1a1a1a; 
+        }
+        .btn { 
+            display: block; 
+            width: 100%; 
+            padding: 14px 16px; 
+            background: #1a1a1a; 
+            color: #ffffff; 
+            text-align: center; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 500; 
+            font-size: 0.95rem;
+            cursor: pointer; 
+            transition: background-color 0.2s, transform 0.2s; 
+        }
+        .btn:hover { 
+            background: #333;
+            transform: translateY(-1px);
+        }
+        .error { 
+            color: #b91c1c; 
+            margin-bottom: 1rem; 
+            background: #fef2f2; 
+            border: 1px solid #fecaca; 
+            padding: 12px 16px; 
+            border-radius: 8px; 
+            font-size: 0.9rem;
+        }
+        .success { 
+            color: #065f46; 
+            margin-bottom: 1rem; 
+            background: #f0fdf4; 
+            border: 1px solid #bbf7d0; 
+            padding: 12px 16px; 
+            border-radius: 8px; 
+            font-size: 0.9rem;
+        }
+        .helper { 
+            margin-top: 1.5rem; 
+            text-align: center; 
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .helper a { 
+            color: #1a1a1a; 
+            text-decoration: none; 
+            font-weight: 500;
+        }
+        .helper a:hover { 
+            text-decoration: underline; 
+        }
+        .password-hint { 
+            font-size: 0.85rem; 
+            color: #666; 
+            margin-top: 6px; 
+        }
     </style>
 </head>
 <body>
@@ -54,7 +126,7 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <div class="logo">📱 Mobile Store</div>
+                <div class="logo">Mobile Store</div>
                 <nav class="nav">
                     <a href="${pageContext.request.contextPath}/">Trang Chủ</a>
                     <a href="${pageContext.request.contextPath}/products">Sản Phẩm</a>

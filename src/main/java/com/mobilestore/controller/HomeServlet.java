@@ -33,6 +33,19 @@ public class HomeServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        String path = request.getRequestURI().substring(request.getContextPath().length());
+        
+        // Bỏ qua static resources (images, css, js, etc.) - để default servlet xử lý
+        if (path.startsWith("/images/") || 
+            path.startsWith("/css/") || 
+            path.startsWith("/js/") ||
+            path.startsWith("/assets/") ||
+            (path.contains(".") && !path.endsWith(".jsp") && !path.endsWith(".html"))) {
+            // Forward đến default servlet để xử lý static resources
+            getServletContext().getNamedDispatcher("default").forward(request, response);
+            return;
+        }
+        
         // Thiết lập encoding
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
