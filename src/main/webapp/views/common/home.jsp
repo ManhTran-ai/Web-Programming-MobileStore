@@ -140,6 +140,7 @@
                     <a href="${pageContext.request.contextPath}/">Trang Chủ</a>
                     <a href="${pageContext.request.contextPath}/products">Sản Phẩm</a>
                     <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng</a>
+                    <a href="${pageContext.request.contextPath}/register">Đăng Ký</a>
                     <a href="${pageContext.request.contextPath}/login">Đăng Nhập</a>
                 </nav>
             </div>

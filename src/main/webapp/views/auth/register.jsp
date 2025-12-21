@@ -4,7 +4,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng nhập</title>
+    <title>Đăng ký</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -38,6 +38,7 @@
         .field { margin-bottom: 1rem; }
         label { display:block; margin-bottom: 6px; color:#374151; font-weight: 600; }
         input { width:100%; padding:12px 14px; border:1px solid #d1d5db; border-radius:8px; }
+        input:focus { outline: none; border-color: #667eea; }
         .btn { display:block; width:100%; padding:12px 16px; background:#667eea; color:#fff; text-align:center; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition: transform .2s; }
         .btn:hover { transform: translateY(-1px); }
         .error { color:#b91c1c; margin-bottom: 12px; background:#fee2e2; border:1px solid #fecaca; padding:10px 12px; border-radius:8px; }
@@ -45,6 +46,7 @@
         .helper { margin-top: 12px; text-align: center; }
         .helper a { color:#667eea; text-decoration: none; }
         .helper a:hover { text-decoration: underline; }
+        .password-hint { font-size: 0.875rem; color: #6b7280; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -68,26 +70,32 @@
         <div class="container">
             <div class="center">
                 <div class="card">
-                    <h2>Đăng nhập</h2>
+                    <h2>Đăng ký tài khoản</h2>
                     <c:if test="${not empty error}">
                         <div class="error">${error}</div>
                     </c:if>
                     <c:if test="${not empty success}">
                         <div class="success">${success}</div>
                     </c:if>
-                    <form method="post" action="${pageContext.request.contextPath}/login">
+                    <form method="post" action="${pageContext.request.contextPath}/register">
                         <div class="field">
                             <label for="username">Tên đăng nhập</label>
-                            <input type="text" id="username" name="username" required />
+                            <input type="text" id="username" name="username" required 
+                                   value="${param.username}" />
                         </div>
                         <div class="field">
                             <label for="password">Mật khẩu</label>
                             <input type="password" id="password" name="password" required />
+                            <div class="password-hint">Mật khẩu phải có ít nhất 6 ký tự</div>
                         </div>
-                        <button class="btn" type="submit">Đăng nhập</button>
+                        <div class="field">
+                            <label for="confirmPassword">Xác nhận mật khẩu</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required />
+                        </div>
+                        <button class="btn" type="submit">Đăng ký</button>
                     </form>
                     <div class="helper">
-                        Chưa có tài khoản? <a href="${pageContext.request.contextPath}/register">Đăng ký ngay</a>
+                        Đã có tài khoản? <a href="${pageContext.request.contextPath}/login">Đăng nhập ngay</a>
                     </div>
                     <div class="helper">
                         <a href="${pageContext.request.contextPath}/">Quay về trang chủ</a>
@@ -98,3 +106,4 @@
     </section>
 </body>
 </html>
+
