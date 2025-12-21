@@ -70,6 +70,36 @@ public class HomeServlet extends HttpServlet {
         }
         
         // Forward đến trang chủ
+        // Load products with pagination for homepage
+        try {
+            com.mobilestore.dao.ProductDAO productDAO = new com.mobilestore.dao.ProductDAO();
+
+            int page = 1;
+            int pageSize = 12; // items per page
+            String pageParam = request.getParameter("page");
+            String sizeParam = request.getParameter("size");
+            if (pageParam != null) {
+                try { page = Math.max(1, Integer.parseInt(pageParam)); } catch (NumberFormatException ignored) {}
+            }
+            if (sizeParam != null) {
+                try { pageSize = Math.max(1, Integer.parseInt(sizeParam)); } catch (NumberFormatException ignored) {}
+            }
+
+            int totalItems = productDAO.countAll();
+            int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            int offset = (page - 1) * pageSize;
+            java.util.List<com.mobilestore.entity.Product> products = productDAO.findPage(offset, pageSize);
+
+            request.setAttribute("products", products);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("pageSize", pageSize);
+            request.setAttribute("totalItems", totalItems);
+        } catch (Exception e) {
+            System.err.println("Lỗi khi load products trên homepage: " + e.getMessage());
+        }
         request.getRequestDispatcher("/views/common/home.jsp").forward(request, response);
     }
     
