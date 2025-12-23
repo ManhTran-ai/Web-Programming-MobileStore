@@ -465,27 +465,23 @@
                 <ul class="sidebar-nav">
                     <li>
                         <a href="${pageContext.request.contextPath}/">
-                            <span class="icon">🏠</span> Trang chủ
+                            Trang chủ
                         </a>
                     </li>
                     <li>
                         <a href="${pageContext.request.contextPath}/admin/products" class="active">
-                            <span class="icon">📱</span> Sản phẩm
+                            Sản phẩm
                         </a>
                     </li>
-                    <li>
-                        <a href="${pageContext.request.contextPath}/admin/categories">
-                            <span class="icon">📁</span> Danh mục
-                        </a>
-                    </li>
+                    <!-- Categories menu removed -->
                     <li>
                         <a href="${pageContext.request.contextPath}/admin/orders">
-                            <span class="icon">📦</span> Đơn hàng
+                            Đơn hàng
                         </a>
                     </li>
                     <li>
                         <a href="${pageContext.request.contextPath}/admin/users">
-                            <span class="icon">👥</span> Người dùng
+                            Người dùng
                         </a>
                     </li>
                 </ul>
@@ -627,11 +623,20 @@
                                 </c:forEach>
                             </select>
                             <div class="invalid-feedback" id="categoryError">Vui lòng chọn danh mục</div>
-                            <c:if test="${empty categories}">
-                                <p class="help-text" style="color: #ff3b30;">
-                                    ⚠️ Chưa có danh mục nào. Vui lòng <a href="${pageContext.request.contextPath}/admin/categories/add">tạo danh mục</a> trước.
-                                </p>
-                            </c:if>
+                        </div>
+
+                        <div class="form-group" style="grid-column: 2 / span 1;">
+                            <label class="form-label" for="newCategoryName">
+                                Hoặc tạo danh mục mới
+                            </label>
+                            <input type="text"
+                                   id="newCategoryName"
+                                   name="newCategoryName"
+                                   class="form-control"
+                                   placeholder="Nhập tên danh mục mới để tạo nhanh"
+                                   maxlength="255"
+                                   value="">
+                            <div class="help-text">Nhập tên danh mục mới để tạo nhanh. Nếu nhập, mục 'Danh mục' sẽ bị bỏ chọn.</div>
                         </div>
 
                         <div class="form-group">
@@ -831,13 +836,16 @@
 
         function validateCategory() {
             const value = categorySelect.value;
+            const newCategoryVal = newCategoryInput ? newCategoryInput.value.trim() : '';
             const errorEl = document.getElementById('categoryError');
 
-            if (!value) {
-                setInvalid(categorySelect, errorEl, 'Vui lòng chọn danh mục');
+            // If either a selected category or a new category name is provided, it's valid
+            if ((!value || value.trim() === '') && newCategoryVal === '') {
+                setInvalid(categorySelect, errorEl, 'Vui lòng chọn danh mục hoặc nhập danh mục mới');
                 return false;
             }
 
+            // Show valid state (for UX we mark the select as valid; new category input stays untouched)
             setValid(categorySelect);
             return true;
         }
@@ -889,6 +897,15 @@
         function setValid(input) {
             input.classList.remove('is-invalid');
             input.classList.add('is-valid');
+            // Hide related invalid-feedback element if present
+            try {
+                var next = input.nextElementSibling;
+                if (next && next.classList && next.classList.contains('invalid-feedback')) {
+                    next.style.display = 'none';
+                }
+            } catch (e) {
+                // ignore
+            }
         }
 
         function setInvalidFile(errorEl, message) {
@@ -1046,6 +1063,12 @@
                 errors.push('Hình ảnh: ' + document.getElementById('imageError').textContent);
             }
 
+            // If new category name provided, basic client validation
+            const newCategoryInput = document.getElementById('newCategoryName');
+            if (newCategoryInput && newCategoryInput.value.trim().length > 255) {
+                errors.push('Danh mục mới: Tên không được vượt quá 255 ký tự');
+            }
+
             if (errors.length > 0) {
                 showClientErrors(errors);
                 return false;
@@ -1055,6 +1078,27 @@
             setLoading(true);
             form.submit();
         });
+
+        // Toggle: if typing new category, disable select; if select changed, clear new category
+        const newCategoryInput = document.getElementById('newCategoryName');
+        const categorySelectEl = document.getElementById('categoryId');
+        if (newCategoryInput) {
+            newCategoryInput.addEventListener('input', function() {
+                if (this.value.trim().length > 0) {
+                    categorySelectEl.disabled = true;
+                } else {
+                    categorySelectEl.disabled = false;
+                }
+            });
+        }
+        if (categorySelectEl) {
+            categorySelectEl.addEventListener('change', function() {
+                if (this.value) {
+                    newCategoryInput.value = '';
+                    newCategoryInput.dispatchEvent(new Event('input'));
+                }
+            });
+        }
 
         // Initialize counters
         updateCharCounter(productNameInput, 'productNameCount', CONFIG.maxProductNameLength);

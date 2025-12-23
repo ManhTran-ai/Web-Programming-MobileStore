@@ -34,8 +34,12 @@ public class AdminProductServlet extends HttpServlet {
     private final ProductDAO productDAO = new ProductDAO();
     private final CategoryDAO categoryDAO = new CategoryDAO();
 
-    // Thư mục lưu ảnh sản phẩm
+    // Thư mục lưu ảnh sản phẩm (đường dẫn tương đối trong webapp, được lưu vào DB)
     private static final String UPLOAD_DIR = "images/products";
+    // UPLOAD_ROOT: đặt thành đường dẫn tuyệt đối tới thư mục webapp source để lưu trực tiếp vào source
+    // Bạn yêu cầu lưu ảnh vào: D:\Web-Programming-MobileStore\src\main\webapp\images\products
+    // Do đó UPLOAD_ROOT sẽ trỏ tới webapp root:
+    private static final String UPLOAD_ROOT = "D:\\\\Web-Programming-MobileStore\\\\src\\\\main\\\\webapp";
 
     // Allowed image extensions
     private static final Set<String> ALLOWED_EXTENSIONS = new HashSet<>(
@@ -181,8 +185,27 @@ public class AdminProductServlet extends HttpServlet {
             Category category = new Category();
             category.setId(formData.getCategoryId());
             product.setCategory(category);
+            // Kiểm tra sản phẩm đã tồn tại (theo tên, nhà sản xuất, tình trạng, danh mục)
+            Product existing = productDAO.findByUniqueKey(product.getProductName(),
+                    product.getManufacturer(),
+                    product.getProductCondition(),
+                    product.getCategory() != null ? product.getCategory().getId() : null);
 
-            // Lưu vào database
+            if (existing != null) {
+                // Nếu tồn tại, chỉ tăng số lượng
+                int newQty = existing.getQuantityInStock() + product.getQuantityInStock();
+                existing.setQuantityInStock(newQty);
+                boolean updated = productDAO.update(existing);
+                if (updated) {
+                    response.sendRedirect(request.getContextPath() + "/admin/products?success=quantity_updated");
+                } else {
+                    formData.addError("Không thể cập nhật số lượng sản phẩm. Vui lòng thử lại.");
+                    setErrorAndForward(request, response, formData.getErrors(), formData);
+                }
+                return;
+            }
+
+            // Nếu chưa tồn tại, lưu sản phẩm mới
             Product createdProduct = productDAO.create(product);
 
             if (createdProduct != null) {
@@ -382,8 +405,13 @@ public class AdminProductServlet extends HttpServlet {
         // Tạo tên file unique để tránh trùng lặp và bảo mật
         String uniqueFileName = UUID.randomUUID().toString() + extension;
 
-        // Lấy đường dẫn thực tế trên server
-        String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
+        // Lấy đường dẫn thực tế trên server hoặc sử dụng UPLOAD_ROOT nếu được cấu hình (giữ nguyên UPLOAD_DIR làm đường dẫn tương đối để lưu vào DB)
+        String uploadPath;
+        if (UPLOAD_ROOT != null && !UPLOAD_ROOT.trim().isEmpty()) {
+            uploadPath = UPLOAD_ROOT + File.separator + UPLOAD_DIR;
+        } else {
+            uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
+        }
 
         // Tạo thư mục nếu chưa tồn tại
         File uploadDir = new File(uploadPath);
@@ -400,8 +428,17 @@ public class AdminProductServlet extends HttpServlet {
             Files.copy(input, filePath, StandardCopyOption.REPLACE_EXISTING);
         }
 
-        // Trả về đường dẫn tương đối
-        return new FileUploadResult(true, UPLOAD_DIR + "/" + uniqueFileName, null);
+        // Trả về đường dẫn tương đối (lưu vào DB) - đảm bảo không có leading slash
+        String dbPath = UPLOAD_DIR + "/" + uniqueFileName;
+        if (dbPath.startsWith("/")) {
+            dbPath = dbPath.substring(1);
+        }
+
+        // Log thông tin lưu file để debug
+        System.out.println("Uploaded file saved to filesystem: " + filePath.toAbsolutePath());
+        System.out.println("Image DB path to store: " + dbPath);
+
+        return new FileUploadResult(true, dbPath, null);
     }
 
     /**
@@ -413,12 +450,27 @@ public class AdminProductServlet extends HttpServlet {
         }
 
         try {
-            String fullPath = getServletContext().getRealPath("") + File.separator + imagePath;
-            File file = new File(fullPath);
+            // Try configured upload root first, fallback to servlet context real path
+            String fullPath = null;
+            if (UPLOAD_ROOT != null && !UPLOAD_ROOT.trim().isEmpty()) {
+                fullPath = UPLOAD_ROOT + File.separator + imagePath;
+            }
+            File file = null;
+            if (fullPath != null) {
+                file = new File(fullPath);
+            }
+            if (file == null || !file.exists()) {
+                String fallback = getServletContext().getRealPath("") + File.separator + imagePath;
+                file = new File(fallback);
+            }
+            if (file == null) {
+                return;
+            }
+            String actualPath = file.getAbsolutePath();
             if (file.exists()) {
                 boolean deleted = file.delete();
                 if (!deleted) {
-                    System.err.println("Không thể xóa file: " + fullPath);
+                    System.err.println("Không thể xóa file: " + actualPath);
                 }
             }
         } catch (Exception e) {
@@ -451,12 +503,14 @@ public class AdminProductServlet extends HttpServlet {
         String quantityStr = request.getParameter("quantityInStock");
         String productInfo = request.getParameter("productInfo");
         String categoryIdStr = request.getParameter("categoryId");
+        String newCategoryName = request.getParameter("newCategoryName");
 
         // Set raw values for re-display
         formData.setProductName(productName != null ? productName.trim() : "");
         formData.setManufacturer(manufacturer != null ? manufacturer.trim() : "");
         formData.setProductCondition(productCondition != null ? productCondition.trim() : "Mới");
         formData.setProductInfo(productInfo != null ? productInfo.trim() : "");
+        formData.setNewCategoryName(newCategoryName != null ? newCategoryName.trim() : "");
 
         // Validate productName
         if (productName == null || productName.trim().isEmpty()) {
@@ -510,10 +564,32 @@ public class AdminProductServlet extends HttpServlet {
             }
         }
 
-        // Validate categoryId
-        if (categoryIdStr == null || categoryIdStr.trim().isEmpty()) {
-            formData.addError("Vui lòng chọn danh mục");
+        // Validate category selection OR new category creation
+        if ((categoryIdStr == null || categoryIdStr.trim().isEmpty())
+                && (newCategoryName == null || newCategoryName.trim().isEmpty())) {
+            formData.addError("Vui lòng chọn danh mục hoặc nhập tên danh mục mới");
+        } else if (newCategoryName != null && !newCategoryName.trim().isEmpty()) {
+            // Create or reuse category by name
+            String name = newCategoryName.trim();
+            if (name.length() > 255) {
+                formData.addError("Tên danh mục không được vượt quá 255 ký tự");
+            } else {
+                Category existing = categoryDAO.findByName(name);
+                if (existing != null) {
+                    formData.setCategoryId(existing.getId());
+                } else {
+                    Category toCreate = new Category();
+                    toCreate.setName(name);
+                    Category created = categoryDAO.create(toCreate);
+                    if (created == null) {
+                        formData.addError("Không thể tạo danh mục mới. Vui lòng thử lại.");
+                    } else {
+                        formData.setCategoryId(created.getId());
+                    }
+                }
+            }
         } else {
+            // Use selected category id
             try {
                 int categoryId = Integer.parseInt(categoryIdStr.trim());
                 if (categoryId <= 0) {
@@ -669,6 +745,7 @@ public class AdminProductServlet extends HttpServlet {
         private Float price;
         private Integer quantityInStock;
         private String productInfo;
+        private String newCategoryName;
         private Integer categoryId;
         private List<String> errors = new ArrayList<>();
 
@@ -700,6 +777,8 @@ public class AdminProductServlet extends HttpServlet {
 
         public Integer getCategoryId() { return categoryId; }
         public void setCategoryId(Integer categoryId) { this.categoryId = categoryId; }
+        public String getNewCategoryName() { return newCategoryName; }
+        public void setNewCategoryName(String newCategoryName) { this.newCategoryName = newCategoryName; }
     }
 }
 

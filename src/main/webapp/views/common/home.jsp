@@ -549,6 +549,64 @@
             </div>
         </div>
     </section>
+    
+    <!-- Products Section -->
+    <section class="products" style="padding: 3rem 0; background:#ffffff;">
+        <div class="container">
+            <h2 style="text-align:center; margin-bottom:1.25rem;">Sản phẩm nổi bật</h2>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1.5rem;">
+                <c:forEach var="product" items="${products}">
+                    <div style="border:1px solid #e5e5ea; border-radius:12px; padding:1rem; text-align:left; background:#fff;">
+                        <a href="${pageContext.request.contextPath}/products/view?id=${product.id}" style="text-decoration:none; color:inherit;">
+                            <div style="height:160px; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:0.75rem;">
+                                <c:choose>
+                                    <c:when test="${not empty product.image}">
+                                        <img src="${pageContext.request.contextPath}/${product.image}" alt="${product.productName}" style="max-width:100%; max-height:100%; object-fit:contain;">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#888;">📱</div>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                            <div style="font-weight:600; margin-bottom:0.25rem;">${product.productName}</div>
+                            <div style="color:#666; font-size:0.9rem; margin-bottom:0.5rem;">${product.manufacturer}</div>
+                            <div style="font-weight:700; color:#0071e3; margin-bottom:0.5rem;">
+                                <fmt:formatNumber value="${product.price}" type="number" groupingUsed="true"/>₫
+                            </div>
+                            <div style="font-size:0.9rem; color:#888;">
+                                <c:choose>
+                                    <c:when test="${product.quantityInStock == 0}">Hết hàng</c:when>
+                                    <c:otherwise>Tồn kho: ${product.quantityInStock}</c:otherwise>
+                                </c:choose>
+                            </div>
+                        </a>
+                    </div>
+                </c:forEach>
+            </div>
+
+            <!-- Pagination -->
+            <c:if test="${totalPages > 1}">
+                <div style="display:flex; justify-content:center; gap:0.5rem; margin-top:1.5rem;">
+                    <c:if test="${currentPage > 1}">
+                        <a class="btn" href="${pageContext.request.contextPath}/?page=${currentPage - 1}">« Trước</a>
+                    </c:if>
+                    <c:forEach var="p" begin="1" end="${totalPages}">
+                        <c:choose>
+                            <c:when test="${p == currentPage}">
+                                <span class="btn btn-secondary" style="background:#e5e5ea; color:#1a1a1a;">${p}</span>
+                            </c:when>
+                            <c:otherwise>
+                                <a class="btn" href="${pageContext.request.contextPath}/?page=${p}">${p}</a>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:forEach>
+                    <c:if test="${currentPage < totalPages}">
+                        <a class="btn" href="${pageContext.request.contextPath}/?page=${currentPage + 1}">Tiếp »</a>
+                    </c:if>
+                </div>
+            </c:if>
+        </div>
+    </section>
 
     <!-- Footer -->
     <footer class="footer">
