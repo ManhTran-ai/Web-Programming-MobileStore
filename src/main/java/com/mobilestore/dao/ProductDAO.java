@@ -17,8 +17,9 @@ public class ProductDAO {
      * Tìm product theo ID
      */
     public Product findById(Integer id) {
-        String sql = "SELECT p.product_id, p.product_name, p.manufacturer, p.product_condition, " +
-                     "p.price, p.image, p.product_info, p.quantity_in_stock, p.category_id, " +
+        String sql = "SELECT p.product_id, p.product_name, " +
+                     "p.brand_id AS manufacturer, p.status AS product_condition, " +
+                     "p.price, p.image_url AS image, p.description AS product_info, p.stock_quantity AS quantity_in_stock, p.category_id, " +
                      "c.category_name " +
                      "FROM products p " +
                      "LEFT JOIN categories c ON p.category_id = c.category_id " +
@@ -46,8 +47,9 @@ public class ProductDAO {
      */
     public List<Product> findAll() {
         List<Product> products = new ArrayList<>();
-        String sql = "SELECT p.product_id, p.product_name, p.manufacturer, p.product_condition, " +
-                     "p.price, p.image, p.product_info, p.quantity_in_stock, p.category_id, " +
+        String sql = "SELECT p.product_id, p.product_name, " +
+                     "p.brand_id AS manufacturer, p.status AS product_condition, " +
+                     "p.price, p.image_url AS image, p.description AS product_info, p.stock_quantity AS quantity_in_stock, p.category_id, " +
                      "c.category_name " +
                      "FROM products p " +
                      "LEFT JOIN categories c ON p.category_id = c.category_id " +
@@ -72,8 +74,9 @@ public class ProductDAO {
      */
     public List<Product> findByCategory(Integer categoryId) {
         List<Product> products = new ArrayList<>();
-        String sql = "SELECT p.product_id, p.product_name, p.manufacturer, p.product_condition, " +
-                     "p.price, p.image, p.product_info, p.quantity_in_stock, p.category_id, " +
+        String sql = "SELECT p.product_id, p.product_name, " +
+                     "p.brand_id AS manufacturer, p.status AS product_condition, " +
+                     "p.price, p.image_url AS image, p.description AS product_info, p.stock_quantity AS quantity_in_stock, p.category_id, " +
                      "c.category_name " +
                      "FROM products p " +
                      "LEFT JOIN categories c ON p.category_id = c.category_id " +
@@ -102,12 +105,13 @@ public class ProductDAO {
      */
     public List<Product> searchByName(String keyword) {
         List<Product> products = new ArrayList<>();
-        String sql = "SELECT p.product_id, p.product_name, p.manufacturer, p.product_condition, " +
-                     "p.price, p.image, p.product_info, p.quantity_in_stock, p.category_id, " +
+        String sql = "SELECT p.product_id, p.product_name, " +
+                     "p.brand_id AS manufacturer, p.status AS product_condition, " +
+                     "p.price, p.image_url AS image, p.description AS product_info, p.stock_quantity AS quantity_in_stock, p.category_id, " +
                      "c.category_name " +
                      "FROM products p " +
                      "LEFT JOIN categories c ON p.category_id = c.category_id " +
-                     "WHERE p.product_name LIKE ? OR p.manufacturer LIKE ? " +
+                     "WHERE p.product_name LIKE ? OR p.description LIKE ? " +
                      "ORDER BY p.product_id";
         
         try (Connection conn = DatabaseConnection.getConnection();
@@ -152,8 +156,9 @@ public class ProductDAO {
      */
     public List<Product> findPage(int offset, int limit) {
         List<Product> products = new ArrayList<>();
-        String sql = "SELECT p.product_id, p.product_name, p.manufacturer, p.product_condition, " +
-                     "p.price, p.image, p.product_info, p.quantity_in_stock, p.category_id, " +
+        String sql = "SELECT p.product_id, p.product_name, " +
+                     "p.brand_id AS manufacturer, p.status AS product_condition, " +
+                     "p.price, p.image_url AS image, p.description AS product_info, p.stock_quantity AS quantity_in_stock, p.category_id, " +
                      "c.category_name " +
                      "FROM products p " +
                      "LEFT JOIN categories c ON p.category_id = c.category_id " +
@@ -278,9 +283,9 @@ public class ProductDAO {
      * Trả về product nếu tồn tại, null nếu không tồn tại
      */
     public Product findByUniqueKey(String productName, String manufacturer, String productCondition, Integer categoryId) {
-        StringBuilder sql = new StringBuilder("SELECT p.product_id, p.product_name, p.manufacturer, p.product_condition, ")
-                .append("p.price, p.image, p.product_info, p.quantity_in_stock, p.category_id, c.category_name ")
-                .append("FROM products p LEFT JOIN categories c ON p.category_id = c.category_id WHERE p.product_name = ? AND p.manufacturer = ? AND p.product_condition = ? ");
+        StringBuilder sql = new StringBuilder("SELECT p.product_id, p.product_name, p.brand_id AS manufacturer, p.status AS product_condition, ")
+                .append("p.price, p.image_url AS image, p.description AS product_info, p.stock_quantity AS quantity_in_stock, p.category_id, c.category_name ")
+                .append("FROM products p LEFT JOIN categories c ON p.category_id = c.category_id WHERE p.product_name = ? AND p.description = ? AND p.status = ? ");
 
         if (categoryId == null) {
             sql.append("AND p.category_id IS NULL");
