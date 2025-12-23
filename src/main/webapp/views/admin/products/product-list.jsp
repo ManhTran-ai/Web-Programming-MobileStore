@@ -581,7 +581,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Mobile Store</h2>
-                <span>Admin Panel</span>
+                <span>Trang Quản Lý</span>
             </div>
             <nav>
                 <ul class="sidebar-nav">
