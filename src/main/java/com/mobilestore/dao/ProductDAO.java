@@ -197,7 +197,12 @@ public class ProductDAO {
             ps.setString(2, product.getManufacturer());
             ps.setString(3, product.getProductCondition());
             ps.setFloat(4, product.getPrice());
-            ps.setString(5, product.getImage());
+            // Ensure stored image path does not contain leading context path or leading slash
+            String imageToStore = product.getImage();
+            if (imageToStore != null && imageToStore.startsWith("/")) {
+                imageToStore = imageToStore.substring(1);
+            }
+            ps.setString(5, imageToStore);
             ps.setString(6, product.getProductInfo());
             ps.setInt(7, product.getQuantityInStock());
             // Fix: Sử dụng setObject thay vì setInt để hỗ trợ null value
@@ -325,7 +330,14 @@ public class ProductDAO {
         product.setManufacturer(rs.getString("manufacturer"));
         product.setProductCondition(rs.getString("product_condition"));
         product.setPrice(rs.getFloat("price"));
-        product.setImage(rs.getString("image"));
+        String img = rs.getString("image");
+        if (img != null) {
+            // Normalize: remove leading slash if present so JSP path building stays consistent
+            if (img.startsWith("/")) {
+                img = img.substring(1);
+            }
+        }
+        product.setImage(img);
         product.setProductInfo(rs.getString("product_info"));
         product.setQuantityInStock(rs.getInt("quantity_in_stock"));
         

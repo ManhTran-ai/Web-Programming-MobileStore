@@ -465,22 +465,23 @@
                 <ul class="sidebar-nav">
                     <li>
                         <a href="${pageContext.request.contextPath}/">
-                            <span class="icon">🏠</span> Trang chủ
+                            Trang chủ
                         </a>
                     </li>
                     <li>
                         <a href="${pageContext.request.contextPath}/admin/products" class="active">
-                            <span class="icon">📱</span> Sản phẩm
+                            Sản phẩm
                         </a>
                     </li>
+                    <!-- Categories menu removed -->
                     <li>
                         <a href="${pageContext.request.contextPath}/admin/orders">
-                            <span class="icon">📦</span> Đơn hàng
+                            Đơn hàng
                         </a>
                     </li>
                     <li>
                         <a href="${pageContext.request.contextPath}/admin/users">
-                            <span class="icon">👥</span> Người dùng
+                            Người dùng
                         </a>
                     </li>
                 </ul>

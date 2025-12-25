@@ -34,8 +34,12 @@ public class AdminProductServlet extends HttpServlet {
     private final ProductDAO productDAO = new ProductDAO();
     private final CategoryDAO categoryDAO = new CategoryDAO();
 
-    // Thư mục lưu ảnh sản phẩm
+    // Thư mục lưu ảnh sản phẩm (đường dẫn tương đối trong webapp, được lưu vào DB)
     private static final String UPLOAD_DIR = "images/products";
+    // UPLOAD_ROOT: đặt thành đường dẫn tuyệt đối tới thư mục webapp source để lưu trực tiếp vào source
+    // Bạn yêu cầu lưu ảnh vào: D:\Web-Programming-MobileStore\src\main\webapp\images\products
+    // Do đó UPLOAD_ROOT sẽ trỏ tới webapp root:
+    private static final String UPLOAD_ROOT = "D:\\\\Web-Programming-MobileStore\\\\src\\\\main\\\\webapp";
 
     // Allowed image extensions
     private static final Set<String> ALLOWED_EXTENSIONS = new HashSet<>(
@@ -401,8 +405,13 @@ public class AdminProductServlet extends HttpServlet {
         // Tạo tên file unique để tránh trùng lặp và bảo mật
         String uniqueFileName = UUID.randomUUID().toString() + extension;
 
-        // Lấy đường dẫn thực tế trên server
-        String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
+        // Lấy đường dẫn thực tế trên server hoặc sử dụng UPLOAD_ROOT nếu được cấu hình (giữ nguyên UPLOAD_DIR làm đường dẫn tương đối để lưu vào DB)
+        String uploadPath;
+        if (UPLOAD_ROOT != null && !UPLOAD_ROOT.trim().isEmpty()) {
+            uploadPath = UPLOAD_ROOT + File.separator + UPLOAD_DIR;
+        } else {
+            uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
+        }
 
         // Tạo thư mục nếu chưa tồn tại
         File uploadDir = new File(uploadPath);
@@ -419,8 +428,17 @@ public class AdminProductServlet extends HttpServlet {
             Files.copy(input, filePath, StandardCopyOption.REPLACE_EXISTING);
         }
 
-        // Trả về đường dẫn tương đối
-        return new FileUploadResult(true, UPLOAD_DIR + "/" + uniqueFileName, null);
+        // Trả về đường dẫn tương đối (lưu vào DB) - đảm bảo không có leading slash
+        String dbPath = UPLOAD_DIR + "/" + uniqueFileName;
+        if (dbPath.startsWith("/")) {
+            dbPath = dbPath.substring(1);
+        }
+
+        // Log thông tin lưu file để debug
+        System.out.println("Uploaded file saved to filesystem: " + filePath.toAbsolutePath());
+        System.out.println("Image DB path to store: " + dbPath);
+
+        return new FileUploadResult(true, dbPath, null);
     }
 
     /**
@@ -432,12 +450,27 @@ public class AdminProductServlet extends HttpServlet {
         }
 
         try {
-            String fullPath = getServletContext().getRealPath("") + File.separator + imagePath;
-            File file = new File(fullPath);
+            // Try configured upload root first, fallback to servlet context real path
+            String fullPath = null;
+            if (UPLOAD_ROOT != null && !UPLOAD_ROOT.trim().isEmpty()) {
+                fullPath = UPLOAD_ROOT + File.separator + imagePath;
+            }
+            File file = null;
+            if (fullPath != null) {
+                file = new File(fullPath);
+            }
+            if (file == null || !file.exists()) {
+                String fallback = getServletContext().getRealPath("") + File.separator + imagePath;
+                file = new File(fallback);
+            }
+            if (file == null) {
+                return;
+            }
+            String actualPath = file.getAbsolutePath();
             if (file.exists()) {
                 boolean deleted = file.delete();
                 if (!deleted) {
-                    System.err.println("Không thể xóa file: " + fullPath);
+                    System.err.println("Không thể xóa file: " + actualPath);
                 }
             }
         } catch (Exception e) {
