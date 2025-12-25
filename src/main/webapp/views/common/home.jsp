@@ -282,6 +282,8 @@
             font-size: 0.95rem;
         }
     </style>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/slider.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/home-categories.css">
 </head>
 <body>
     <!-- Header -->
@@ -321,6 +323,13 @@
 
     <!-- Hero Section with Carousel -->
     <section class="hero">
+        <div class="hero-content">
+            <div class="container">
+                <h1>Chào Mừng Đến Mobile Store</h1>
+                <p>Nơi bạn tìm thấy những chiếc điện thoại tốt nhất với giá cả hợp lý</p>
+                <a href="${pageContext.request.contextPath}/products" class="btn">Xem Sản Phẩm</a>
+            </div>
+        </div>
         <div class="carousel-container">
             <div class="carousel-slides" id="carouselSlides">
                 <div class="carousel-slide">
@@ -333,193 +342,75 @@
                     <img src="${pageContext.request.contextPath}/images/img_3.png" alt="iPhone 14 Pro" />
                 </div>
             </div>
-            <button class="carousel-nav prev" type="button">‹</button>
-            <button class="carousel-nav next" type="button">›</button>
+            
             <div class="carousel-dots" id="carouselDots"></div>
-        </div>
-        <div class="hero-content">
-            <div class="container">
-                <h1>Chào Mừng Đến Mobile Store</h1>
-                <p>Nơi bạn tìm thấy những chiếc điện thoại tốt nhất với giá cả hợp lý</p>
-                <a href="${pageContext.request.contextPath}/products" class="btn">Xem Sản Phẩm</a>
-            </div>
         </div>
     </section>
     
-    <script>
-        // Carousel state - đặt ngoài để có thể truy cập từ mọi nơi
-        let carouselState = {
-            currentSlide: 0,
-            totalSlides: 0,
-            autoPlayInterval: null
-        };
-        
-        // Định nghĩa các hàm trước để có thể sử dụng trong initCarousel
-        function updateCarousel() {
-            const slidesContainer = document.getElementById('carouselSlides');
-            if (slidesContainer) {
-                // Tính toán dựa trên width của slide đầu tiên (mỗi slide = 100% của parent)
-                const firstSlide = slidesContainer.querySelector('.carousel-slide');
-                const parentContainer = slidesContainer.parentElement;
-                
-                if (firstSlide && parentContainer) {
-                    // Lấy width của parent container (mỗi slide = 100% của parent)
-                    const slideWidth = parentContainer.offsetWidth;
-                    const translateValue = -(carouselState.currentSlide * slideWidth);
-                    
-                    // Áp dụng transform với pixel
-                    slidesContainer.style.transform = `translateX(${translateValue}px)`;
-                    slidesContainer.style.webkitTransform = `translateX(${translateValue}px)`;
-                    slidesContainer.style.MozTransform = `translateX(${translateValue}px)`;
-                    slidesContainer.style.msTransform = `translateX(${translateValue}px)`;
-                    slidesContainer.style.OTransform = `translateX(${translateValue}px)`;
-                    
-                    // Force reflow
-                    void slidesContainer.offsetWidth;
-                    
-                    // Kiểm tra transform thực tế
-                    const computedTransform = window.getComputedStyle(slidesContainer).transform;
-                    const computedWebkitTransform = window.getComputedStyle(slidesContainer).webkitTransform;
-                    
-                    console.log('Carousel updated to slide:', carouselState.currentSlide, 
-                               'Slide width:', slideWidth,
-                               'Transform:', translateValue + 'px',
-                               'Computed transform:', computedTransform || computedWebkitTransform);
-                } else {
-                    console.error('Không tìm thấy slide hoặc parent container');
-                }
-            } else {
-                console.error('Không tìm thấy carouselSlides container');
-            }
-            
-            // Update dots
-            const dots = document.querySelectorAll('.carousel-dot');
-            dots.forEach((dot, index) => {
-                if (index === carouselState.currentSlide) {
-                    dot.classList.add('active');
-                } else {
-                    dot.classList.remove('active');
-                }
-            });
-        }
-        
-        // Định nghĩa hàm trong global scope
-        window.changeSlide = function(direction) {
-            if (carouselState.totalSlides === 0) {
-                console.error('Carousel chưa được khởi tạo');
-                return;
-            }
-            carouselState.currentSlide = (carouselState.currentSlide + direction + carouselState.totalSlides) % carouselState.totalSlides;
-            console.log('Changing slide:', direction, 'New slide:', carouselState.currentSlide);
-            updateCarousel();
-        };
-        
-        window.goToSlide = function(index) {
-            if (carouselState.totalSlides === 0) {
-                console.error('Carousel chưa được khởi tạo');
-                return;
-            }
-            if (index >= 0 && index < carouselState.totalSlides) {
-                carouselState.currentSlide = index;
-                console.log('Going to slide:', index);
-                updateCarousel();
-            }
-        };
-        
-        function startAutoPlay() {
-            stopAutoPlay(); // Clear existing interval
-            carouselState.autoPlayInterval = setInterval(() => {
-                window.changeSlide(1);
-            }, 5000);
-        }
-        
-        function stopAutoPlay() {
-            if (carouselState.autoPlayInterval) {
-                clearInterval(carouselState.autoPlayInterval);
-                carouselState.autoPlayInterval = null;
-            }
-        }
-        
-        // Hàm khởi tạo carousel
-        function initCarousel() {
-            console.log('Initializing carousel...');
-            const slides = document.querySelectorAll('.carousel-slide');
-            carouselState.totalSlides = slides.length;
-            console.log('Found slides:', carouselState.totalSlides);
-            
-            if (carouselState.totalSlides === 0) {
-                console.error('Không tìm thấy slides trong carousel');
-                return;
-            }
-            
-            // Tạo dots
-            const dotsContainer = document.getElementById('carouselDots');
-            if (dotsContainer) {
-                dotsContainer.innerHTML = ''; // Clear existing dots
-                for (let i = 0; i < carouselState.totalSlides; i++) {
-                    const dot = document.createElement('button');
-                    dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-                    dot.setAttribute('data-slide', i);
-                    dot.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const slideIndex = parseInt(this.getAttribute('data-slide'));
-                        console.log('Dot clicked, going to slide:', slideIndex);
-                        window.goToSlide(slideIndex);
-                    });
-                    dotsContainer.appendChild(dot);
-                }
-            }
-            
-            // Gắn event listeners cho nút điều hướng
-            const prevBtn = document.querySelector('.carousel-nav.prev');
-            const nextBtn = document.querySelector('.carousel-nav.next');
-            
-            console.log('Prev button found:', !!prevBtn);
-            console.log('Next button found:', !!nextBtn);
-            
-            if (prevBtn) {
-                prevBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Prev button clicked');
-                    window.changeSlide(-1);
-                });
-            }
-            
-            if (nextBtn) {
-                nextBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Next button clicked');
-                    window.changeSlide(1);
-                });
-            }
-            
-            // Initialize carousel
-            updateCarousel();
-            
-            // Bắt đầu auto-play
-            startAutoPlay();
-            
-            // Dừng auto-play khi hover vào carousel
-            const carouselContainer = document.querySelector('.carousel-container');
-            if (carouselContainer) {
-                carouselContainer.addEventListener('mouseenter', stopAutoPlay);
-                carouselContainer.addEventListener('mouseleave', startAutoPlay);
-            }
-            
-            console.log('Carousel initialized successfully');
-        }
-        
-        // Khởi tạo khi DOM ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initCarousel);
-        } else {
-            // DOM đã sẵn sàng
-            initCarousel();
-        }
-    </script>
+    <script src="${pageContext.request.contextPath}/assets/js/slider.js"></script>
+
+    <!-- Categories Section -->
+    <section class="categories">
+        <div class="container">
+            <h2 style="text-align:center; margin-bottom:1.25rem;">Khám Phá Sản Phẩm</h2>
+            <div class="categories-grid">
+                <a class="category-tile" href="${pageContext.request.contextPath}/products?category=1">
+                    <div class="category-image">
+                        <img src="${pageContext.request.contextPath}/images/img_1.png" alt="iPhone">
+                    </div>
+                    <div class="category-meta">
+                        <h3>iPhone</h3>
+                        <p>Thiết kế, camera, hiệu năng</p>
+                    </div>
+                </a>
+                <a class="category-tile" href="${pageContext.request.contextPath}/products?category=2">
+                    <div class="category-image">
+                        <img src="${pageContext.request.contextPath}/images/img_2.png" alt="Macbook">
+                    </div>
+                    <div class="category-meta">
+                        <h3>Macbook</h3>
+                        <p>Hiệu năng cho công việc và sáng tạo</p>
+                    </div>
+                </a>
+                <a class="category-tile" href="${pageContext.request.contextPath}/products?category=3">
+                    <div class="category-image">
+                        <img src="${pageContext.request.contextPath}/images/img_3.png" alt="Dell Laptop">
+                    </div>
+                    <div class="category-meta">
+                        <h3>Dell Laptop</h3>
+                        <p>Đa dụng cho doanh nghiệp và học tập</p>
+                    </div>
+                </a>
+                <a class="category-tile" href="${pageContext.request.contextPath}/products?category=4">
+                    <div class="category-image">
+                        <img src="${pageContext.request.contextPath}/images/img_1.png" alt="iPad">
+                    </div>
+                    <div class="category-meta">
+                        <h3>iPad</h3>
+                        <p>Màn hình đa nhiệm, sáng tạo nội dung</p>
+                    </div>
+                </a>
+                <a class="category-tile" href="${pageContext.request.contextPath}/products?category=5">
+                    <div class="category-image">
+                        <img src="${pageContext.request.contextPath}/images/img_2.png" alt="Samsung">
+                    </div>
+                    <div class="category-meta">
+                        <h3>Samsung</h3>
+                        <p>Đổi mới công nghệ và camera</p>
+                    </div>
+                </a>
+                <a class="category-tile" href="${pageContext.request.contextPath}/products?category=6">
+                    <div class="category-image">
+                        <img src="${pageContext.request.contextPath}/images/img_3.png" alt="Xiaomi">
+                    </div>
+                    <div class="category-meta">
+                        <h3>Xiaomi</h3>
+                        <p>Giá trị tốt với tính năng đa dạng</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
 
     <!-- Features Section -->
     <section class="features">
