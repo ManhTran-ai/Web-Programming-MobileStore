@@ -38,11 +38,13 @@
                 <nav class="nav">
                     <a href="${pageContext.request.contextPath}/">Trang Chủ</a>
                     <a href="${pageContext.request.contextPath}/products" style="color:#fff; font-weight:600;">Sản Phẩm</a>
-                    <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng</a>
+                    <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng (<span id="cartCount">0</span>)</a>
+<%--                    <a href="${pageContext.request.contextPath}/cart" title="Giỏ hàng"><span id="cartCount">0</span>--%>
+<%--                    </a>--%>
                     <c:choose>
                         <c:when test="${not empty sessionScope.user}">
                             <c:if test="${sessionScope.user.role.name == 'ADMIN'}">
-                                <a href="${pageContext.request.contextPath}/admin/products" style="color:#0071e3;">Admin Panel</a>
+                                <a href="${pageContext.request.contextPath}/admin/products" style="color:#0071e3;">Trang Quản Lý</a>
                             </c:if>
                             <span style="color:#ccc;">Xin chào, ${sessionScope.user.username}</span>
                             <a href="${pageContext.request.contextPath}/logout">Đăng Xuất</a>
@@ -84,6 +86,9 @@
                                 <c:otherwise>Tồn kho: ${product.quantityInStock}</c:otherwise>
                             </c:choose>
                         </div>
+                        <div style="margin-top:8px;">
+                            <button class="btn add-to-cart-btn" data-id="${product.id}" data-stock="${product.quantityInStock}">Thêm vào giỏ</button>
+                        </div>
                     </a>
                 </div>
             </c:forEach>
@@ -110,6 +115,91 @@
             </div>
         </c:if>
     </main>
+    <script>
+        function refreshCartCount() {
+            fetch('${pageContext.request.contextPath}/cart/count')
+                .then(r => r.json())
+                .then(data => {
+                    const el = document.getElementById('cartCount');
+                    if (el) el.textContent = data.count;
+                }).catch(()=>{});
+        }
+
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const productId = this.getAttribute('data-id');
+                const stock = parseInt(this.getAttribute('data-stock') || '0', 10);
+                if (stock <= 0) {
+                    showToast('Sản phẩm đã hết hàng');
+                    return;
+                }
+
+                fetch('${pageContext.request.contextPath}/cart?action=add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin',
+                    body: 'productId=' + encodeURIComponent(productId) + '&quantity=1'
+                }).then(async res => {
+                    if (res.status === 401) {
+                        const json = await res.json().catch(()=>null);
+                        if (json && json.redirect) {
+                            window.location.href = json.redirect;
+                            return;
+                        }
+                        throw new Error('Vui lòng đăng nhập để tiếp tục');
+                    }
+                    if (!res.ok) {
+                        const txt = await res.text().catch(()=>null);
+                        let msg = 'Lỗi khi thêm vào giỏ';
+                        try { msg = JSON.parse(txt).message || txt || msg; } catch(e){ msg = txt || msg; }
+                        throw new Error(msg);
+                    }
+                    return res.json().catch(()=>null);
+                }).then(json => {
+                    if (json && json.count !== undefined) {
+                        const el = document.getElementById('cartCount');
+                        const elh = document.getElementById('cartCountHeader');
+                        if (el) el.textContent = json.count;
+                        if (elh) elh.textContent = json.count;
+                        showToast('Đã thêm vào giỏ hàng');
+                    } else {
+                        // fallback: refresh count
+                        refreshCartCount();
+                        showToast('Đã thêm vào giỏ hàng');
+                    }
+                }).catch(err => {
+                    console.error('Add to cart failed', err);
+                    alert(err.message || 'Lỗi khi thêm vào giỏ');
+                });
+            });
+        });
+
+        function showToast(message) {
+            let t = document.getElementById('toastMessage');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'toastMessage';
+                t.style.position = 'fixed';
+                t.style.right = '16px';
+                t.style.bottom = '16px';
+                t.style.background = '#111';
+                t.style.color = '#fff';
+                t.style.padding = '10px 14px';
+                t.style.borderRadius = '8px';
+                t.style.zIndex = 9999;
+                document.body.appendChild(t);
+            }
+            t.textContent = message;
+            t.style.opacity = '1';
+            setTimeout(()=>{ t.style.opacity = '0'; }, 2000);
+        }
+
+        // init
+        refreshCartCount();
+    </script>
 </body>
 </html>
 
