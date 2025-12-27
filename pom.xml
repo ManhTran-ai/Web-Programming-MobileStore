@@ -114,13 +114,26 @@
 
             <!-- Tomcat Maven Plugin (để chạy ứng dụng) -->
             <plugin>
-                <groupId>org.apache.tomcat.maven</groupId>
-                <artifactId>tomcat7-maven-plugin</artifactId>
-                <version>2.2</version>
+                <groupId>org.codehaus.cargo</groupId>
+                <artifactId>cargo-maven3-plugin</artifactId>
+                <version>1.10.6</version>
                 <configuration>
-                    <port>8080</port>
-                    <path>/mobile-store</path>
-                    <uriEncoding>UTF-8</uriEncoding>
+                    <container>
+                        <containerId>tomcat11x</containerId>
+                        <type>embedded</type>
+                        <artifactInstaller>
+                            <groupId>org.apache.tomcat</groupId>
+                            <artifactId>tomcat</artifactId>
+                            <version>11.0.11</version>
+                        </artifactInstaller>
+                    </container>
+                    <configuration>
+                        <properties>
+                            <cargo.servlet.port>8080</cargo.servlet.port>
+                            <cargo.tomcat.context.path>/mobilestore</cargo.tomcat.context.path>
+                            <cargo.tomcat.uri.encoding>UTF-8</cargo.tomcat.uri.encoding>
+                        </properties>
+                    </configuration>
                 </configuration>
             </plugin>
         </plugins>

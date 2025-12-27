@@ -6,7 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 
-import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Order entity - POJO class không sử dụng JPA annotations
@@ -19,7 +20,8 @@ import java.time.LocalDateTime;
 public class Order {
     private Integer id;
     private String orderStatus;
-    private LocalDateTime orderDate;
+    private Date orderDate;
     private Double totalAmount;
     private User user;
+    private List<OrderDetail> details;
 }

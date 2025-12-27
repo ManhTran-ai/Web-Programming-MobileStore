@@ -17,14 +17,16 @@
         .header {
             background: #1a1a1a;
             border-bottom: none;
-            padding: 1.25rem 0;
+            height: 72px;
+            padding: 0;
         }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 976px; margin: 0 auto; padding: 0 24px; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; height:100%; }
         .logo { font-size: 1.5rem; font-weight: 600; color: #ffffff; letter-spacing: -0.5px; }
         .nav { display: flex; gap: 2rem; align-items: center; }
-        .nav a { color: #ffffff; text-decoration: none; font-size: 0.95rem; font-weight: 400; transition: opacity 0.2s; }
+        .nav a { color: #ffffff; text-decoration: none; font-size: 0.95rem; font-weight: 400; transition: opacity 0.2s; display:inline-flex; align-items:center; height:72px; line-height:normal; }
         .nav a:hover { opacity: 0.7; }
+        .logo { font-size: 1.5rem; font-weight: 600; color: #ffffff; letter-spacing: -0.5px; display:flex; align-items:center; height:72px; }
 
         .page { padding: 4rem 0; min-height: calc(100vh - 200px); }
         .center { max-width: 420px; margin: 0 auto; }
@@ -125,7 +127,7 @@
                 <nav class="nav">
                     <a href="${pageContext.request.contextPath}/">Trang Chủ</a>
                     <a href="${pageContext.request.contextPath}/products">Sản Phẩm</a>
-                    <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng</a>
+                    <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng(<span id="cartCount">0</span>)</a>
                     <a href="${pageContext.request.contextPath}/login">Đăng Nhập</a>
                 </nav>
             </div>
