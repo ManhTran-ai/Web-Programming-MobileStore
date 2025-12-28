@@ -601,11 +601,6 @@
                             Đơn hàng
                         </a>
                     </li>
-                    <li>
-                        <a href="${pageContext.request.contextPath}/admin/users">
-                             Người dùng
-                        </a>
-                    </li>
                 </ul>
             </nav>
         </aside>
