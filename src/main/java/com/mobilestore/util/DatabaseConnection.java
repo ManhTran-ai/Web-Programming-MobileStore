@@ -9,9 +9,9 @@ import java.sql.SQLException;
  */
 public class DatabaseConnection {
     // Thông tin kết nối database
-    private static final String URL = "jdbc:mysql://localhost:3306/mobilestore?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+    private static final String URL = "jdbc:mysql://localhost:3307/mobilestore?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private static final String USERNAME = "root";
-    private static final String PASSWORD = "1317192005";
+    private static final String PASSWORD = "root";
     
     // Load driver một lần khi class được load
     static {

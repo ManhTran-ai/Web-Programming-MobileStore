@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm'} - Admin Panel</title>
+    <title>${isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm'} - Trang quản lý</title>
     <style>
         * {
             margin: 0;
@@ -459,7 +459,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Mobile Store</h2>
-                <span>Admin Panel</span>
+                <span>Trang quản lý</span>
             </div>
             <nav>
                 <ul class="sidebar-nav">
@@ -477,11 +477,6 @@
                     <li>
                         <a href="${pageContext.request.contextPath}/admin/orders">
                             Đơn hàng
-                        </a>
-                    </li>
-                    <li>
-                        <a href="${pageContext.request.contextPath}/admin/users">
-                            Người dùng
                         </a>
                     </li>
                 </ul>

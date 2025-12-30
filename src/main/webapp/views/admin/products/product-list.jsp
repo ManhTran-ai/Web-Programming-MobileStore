@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Sản phẩm - Admin Panel</title>
+    <title>Quản lý Sản phẩm - Trang quản lý</title>
     <style>
         * {
             margin: 0;
@@ -581,29 +581,24 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Mobile Store</h2>
-                <span>Trang Quản Lý</span>
+                <span>Trang quản lý</span>
             </div>
             <nav>
                 <ul class="sidebar-nav">
                     <li>
                         <a href="${pageContext.request.contextPath}/">
-                            Trang chủ
+                           Trang chủ
                         </a>
                     </li>
                     <li>
                         <a href="${pageContext.request.contextPath}/admin/products" class="active">
-                              Sản phẩm
+                            Sản phẩm
                         </a>
                     </li>
                     <!-- Categories menu removed -->
                     <li>
                         <a href="${pageContext.request.contextPath}/admin/orders">
-                             Đơn hàng
-                        </a>
-                    </li>
-                    <li>
-                        <a href="${pageContext.request.contextPath}/admin/users">
-                             Người dùng
+                            Đơn hàng
                         </a>
                     </li>
                 </ul>

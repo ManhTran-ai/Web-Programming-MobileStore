@@ -23,14 +23,15 @@
         .header {
             background: #1a1a1a;
             border-bottom: none;
-            padding: 1.25rem 0;
+            height: 72px;
+            padding: 0;
             position: sticky;
             top: 0;
             z-index: 100;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 976px;
             margin: 0 auto;
             padding: 0 24px;
         }
@@ -39,6 +40,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 100%;
         }
         
         .logo {
@@ -46,6 +48,9 @@
             font-weight: 600;
             color: #ffffff;
             letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            height: 72px;
         }
         
         .nav {
@@ -60,6 +65,10 @@
             font-size: 0.95rem;
             font-weight: 400;
             transition: opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            height: 72px;
+            line-height: normal;
         }
         
         .nav a:hover {
@@ -294,7 +303,7 @@
                 <nav class="nav">
                     <a href="${pageContext.request.contextPath}/">Trang Chủ</a>
                     <a href="${pageContext.request.contextPath}/products">Sản Phẩm</a>
-                    <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng</a>
+                    <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng(<span id="cartCount">0</span>)</a>
                     <c:choose>
                         <c:when test="${not empty sessionScope.user}">
                             <c:if test="${sessionScope.user.role.name == 'ADMIN'}">
