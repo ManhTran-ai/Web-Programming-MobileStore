@@ -178,6 +178,49 @@
         <h1>Danh sách sản phẩm</h1>
     </div>
 
+    <!-- Search Form -->
+    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 12px;">
+        <form method="GET" action="${pageContext.request.contextPath}/products" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <input type="text" name="search" value="${searchKeyword}"
+                       placeholder="Tìm kiếm sản phẩm..."
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #e5e5ea; border-radius: 8px; font-size: 0.95rem;">
+            </div>
+            <div style="min-width: 150px;">
+                <select name="category" style="width: 100%; padding: 0.75rem; border: 1px solid #e5e5ea; border-radius: 8px; font-size: 0.95rem;">
+                    <option value="">Tất cả danh mục</option>
+                    <c:forEach var="category" items="${categories}">
+                        <option value="${category.id}" ${selectedCategory == category.id ? 'selected' : ''}>
+                            ${category.name}
+                        </option>
+                    </c:forEach>
+                </select>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn" style="padding: 0.75rem 1.5rem;">Tìm kiếm</button>
+                <a href="${pageContext.request.contextPath}/products" class="btn secondary" style="padding: 0.75rem 1.5rem; text-decoration: none;">Xóa bộ lọc</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Search Results Info -->
+    <c:if test="${not empty searchKeyword or not empty selectedCategory}">
+        <div style="margin-bottom: 1rem; color: #666; font-size: 0.9rem;">
+            <c:if test="${not empty searchKeyword}">
+                Kết quả tìm kiếm cho: "<strong>${searchKeyword}</strong>"
+            </c:if>
+            <c:if test="${not empty selectedCategory and not empty searchKeyword}"> | </c:if>
+            <c:if test="${not empty selectedCategory}">
+                Danh mục: <strong>
+                    <c:forEach var="category" items="${categories}">
+                        <c:if test="${category.id == selectedCategory}">${category.name}</c:if>
+                    </c:forEach>
+                </strong>
+            </c:if>
+            - Tìm thấy <strong>${totalItems}</strong> sản phẩm
+        </div>
+    </c:if>
+
     <div class="grid">
         <c:forEach var="product" items="${products}">
             <div class="card">
@@ -216,7 +259,7 @@
     <c:if test="${totalPages > 1}">
         <div class="pagination">
             <c:if test="${currentPage > 1}">
-                <a class="btn" href="${pageContext.request.contextPath}/products?page=${currentPage - 1}">« Trước</a>
+                <a class="btn" href="${pageContext.request.contextPath}/products?page=${currentPage - 1}${not empty searchKeyword ? '&search=' : ''}${searchKeyword}${not empty selectedCategory ? '&category=' : ''}${selectedCategory}">« Trước</a>
             </c:if>
             <c:forEach var="p" begin="1" end="${totalPages}">
                 <c:choose>
@@ -224,12 +267,12 @@
                         <span class="btn secondary">${p}</span>
                     </c:when>
                     <c:otherwise>
-                        <a class="btn" href="${pageContext.request.contextPath}/products?page=${p}">${p}</a>
+                        <a class="btn" href="${pageContext.request.contextPath}/products?page=${p}${not empty searchKeyword ? '&search=' : ''}${searchKeyword}${not empty selectedCategory ? '&category=' : ''}${selectedCategory}">${p}</a>
                     </c:otherwise>
                 </c:choose>
             </c:forEach>
             <c:if test="${currentPage < totalPages}">
-                <a class="btn" href="${pageContext.request.contextPath}/products?page=${currentPage + 1}">Tiếp »</a>
+                <a class="btn" href="${pageContext.request.contextPath}/products?page=${currentPage + 1}${not empty searchKeyword ? '&search=' : ''}${searchKeyword}${not empty selectedCategory ? '&category=' : ''}${selectedCategory}">Tiếp »</a>
             </c:if>
         </div>
     </c:if>

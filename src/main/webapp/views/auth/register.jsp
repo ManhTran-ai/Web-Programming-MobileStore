@@ -125,19 +125,32 @@
 </head>
 <body>
     <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">Mobile Store</div>
-                <nav class="nav">
-                    <a href="${pageContext.request.contextPath}/">Trang Chủ</a>
-                    <a href="${pageContext.request.contextPath}/products">Sản Phẩm</a>
-                    <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng(<span id="cartCount">0</span>)</a>
-                    <a href="${pageContext.request.contextPath}/login">Đăng Nhập</a>
-                </nav>
-            </div>
+<header class="header">
+    <div class="container">
+        <div class="header-content">
+            <div class="logo">Mobile Store</div>
+            <nav class="nav">
+                <a href="${pageContext.request.contextPath}/">Trang Chủ</a>
+                <a href="${pageContext.request.contextPath}/products">Sản Phẩm</a>
+                <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng(<span id="cartCount">0</span>)</a>
+                <c:choose>
+                    <c:when test="${not empty sessionScope.user}">
+                        <c:if test="${sessionScope.user.role.name == 'ADMIN'}">
+                            <a href="${pageContext.request.contextPath}/admin/products" style="color:#0071e3;">Trang
+                                Quản Lý</a>
+                        </c:if>
+                        <span style="color:#ccc;">Xin chào, ${sessionScope.user.username}</span>
+                        <a href="${pageContext.request.contextPath}/logout">Đăng Xuất</a>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="${pageContext.request.contextPath}/register" style="color:#fff; font-weight:600;">Đăng Ký</a>
+                        <a href="${pageContext.request.contextPath}/login">Đăng Nhập</a>
+                    </c:otherwise>
+                </c:choose>
+            </nav>
         </div>
-    </header>
+    </div>
+</header>
 
     <!-- Page Content -->
     <section class="page">
@@ -178,6 +191,19 @@
             </div>
         </div>
     </section>
+    <script>
+        function refreshCartCount() {
+            fetch('${pageContext.request.contextPath}/cart/count')
+                .then(r => r.json())
+                .then(data => {
+                    const el = document.getElementById('cartCount');
+                    if (el) el.textContent = data.count;
+                }).catch(() => {});
+        }
+
+        // init
+        refreshCartCount();
+    </script>
 </body>
 </html>
 

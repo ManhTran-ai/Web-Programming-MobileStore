@@ -113,14 +113,14 @@ public class ProductDAO {
                      "LEFT JOIN categories c ON p.category_id = c.category_id " +
                      "WHERE p.product_name LIKE ? OR p.product_info LIKE ? " +
                      "ORDER BY p.product_id";
-        
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
             String searchPattern = "%" + keyword + "%";
             ps.setString(1, searchPattern);
             ps.setString(2, searchPattern);
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     products.add(mapResultSetToProduct(rs));
@@ -128,6 +128,100 @@ public class ProductDAO {
             }
         } catch (SQLException e) {
             System.err.println("Lỗi khi tìm kiếm products: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return products;
+    }
+
+    /**
+     * Đếm số lượng sản phẩm tìm kiếm được
+     */
+    public int countSearch(String keyword, Integer categoryId) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS total FROM products p WHERE 1=1");
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (p.product_name LIKE ? OR p.product_info LIKE ?)");
+        }
+
+        if (categoryId != null) {
+            sql.append(" AND p.category_id = ?");
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String searchPattern = "%" + keyword + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+
+            if (categoryId != null) {
+                ps.setInt(paramIndex, categoryId);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi đếm products tìm kiếm: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Tìm kiếm sản phẩm với pagination và filter theo category
+     */
+    public List<Product> searchWithFilter(String keyword, Integer categoryId, int offset, int limit) {
+        List<Product> products = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT p.product_id, p.product_name, ")
+                .append("p.manufacturer, p.product_condition, ")
+                .append("p.price, p.image, p.product_info, p.quantity_in_stock, p.category_id, ")
+                .append("c.category_name ")
+                .append("FROM products p ")
+                .append("LEFT JOIN categories c ON p.category_id = c.category_id ")
+                .append("WHERE 1=1");
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (p.product_name LIKE ? OR p.product_info LIKE ?)");
+        }
+
+        if (categoryId != null) {
+            sql.append(" AND p.category_id = ?");
+        }
+
+        sql.append(" ORDER BY p.product_id DESC LIMIT ? OFFSET ?");
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String searchPattern = "%" + keyword + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+
+            if (categoryId != null) {
+                ps.setInt(paramIndex++, categoryId);
+            }
+
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    products.add(mapResultSetToProduct(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm kiếm products với filter: " + e.getMessage());
             e.printStackTrace();
         }
         return products;

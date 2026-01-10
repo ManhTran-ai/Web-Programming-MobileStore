@@ -1,6 +1,7 @@
 package com.mobilestore.controller;
 
 import com.mobilestore.dao.ProductDAO;
+import com.mobilestore.dao.CategoryDAO;
 import com.mobilestore.entity.Product;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -39,6 +40,9 @@ public class ProductsServlet extends HttpServlet {
         int pageSize = 12;
         String pageParam = request.getParameter("page");
         String sizeParam = request.getParameter("size");
+        String searchKeyword = request.getParameter("search");
+        String categoryParam = request.getParameter("category");
+
         if (pageParam != null) {
             try { page = Math.max(1, Integer.parseInt(pageParam)); } catch (NumberFormatException ignored) {}
         }
@@ -47,18 +51,59 @@ public class ProductsServlet extends HttpServlet {
         }
 
         ProductDAO productDAO = new ProductDAO();
-        int totalItems = productDAO.countAll();
-        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
-        if (page > totalPages && totalPages > 0) page = totalPages;
-        int offset = (page - 1) * pageSize;
+        CategoryDAO categoryDAO = new CategoryDAO();
 
-        List<Product> products = productDAO.findPage(offset, pageSize);
+        // Xử lý category filter
+        Integer categoryId = null;
+        if (categoryParam != null && !categoryParam.trim().isEmpty()) {
+            try {
+                categoryId = Integer.parseInt(categoryParam);
+            } catch (NumberFormatException ignored) {}
+        }
+
+        List<Product> products;
+        int totalItems;
+        int totalPages;
+
+        // Kiểm tra xem có tìm kiếm hay không
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            // Tìm kiếm với từ khóa và category filter
+            totalItems = productDAO.countSearch(searchKeyword.trim(), categoryId);
+            totalPages = (int) Math.ceil((double) totalItems / pageSize);
+            if (page > totalPages && totalPages > 0) page = totalPages;
+            int offset = (page - 1) * pageSize;
+
+            products = productDAO.searchWithFilter(searchKeyword.trim(), categoryId, offset, pageSize);
+
+            request.setAttribute("searchKeyword", searchKeyword.trim());
+        } else if (categoryId != null) {
+            // Lọc theo category
+            totalItems = productDAO.countSearch(null, categoryId);
+            totalPages = (int) Math.ceil((double) totalItems / pageSize);
+            if (page > totalPages && totalPages > 0) page = totalPages;
+            int offset = (page - 1) * pageSize;
+
+            products = productDAO.searchWithFilter(null, categoryId, offset, pageSize);
+        } else {
+            // Hiển thị tất cả sản phẩm
+            totalItems = productDAO.countAll();
+            totalPages = (int) Math.ceil((double) totalItems / pageSize);
+            if (page > totalPages && totalPages > 0) page = totalPages;
+            int offset = (page - 1) * pageSize;
+
+            products = productDAO.findPage(offset, pageSize);
+        }
+
+        // Load danh sách categories cho dropdown filter
+        List<com.mobilestore.entity.Category> categories = categoryDAO.findAll();
 
         request.setAttribute("products", products);
+        request.setAttribute("categories", categories);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("pageSize", pageSize);
         request.setAttribute("totalItems", totalItems);
+        request.setAttribute("selectedCategory", categoryId);
 
         request.getRequestDispatcher("/views/products/product-list.jsp").forward(request, response);
     }
@@ -85,13 +130,13 @@ public class ProductsServlet extends HttpServlet {
                 return;
             }
 
-            // Lấy sản phẩm liên quan (cùng category, loại trừ sản phẩm hiện tại)
+
             List<Product> relatedProducts = new ArrayList<>();
             if (product.getCategory() != null && product.getCategory().getId() != null) {
                 relatedProducts = productDAO.findByCategory(product.getCategory().getId())
                     .stream()
                     .filter(p -> !p.getId().equals(product.getId()))
-                    .limit(10) // Giới hạn 10 sản phẩm liên quan
+                    .limit(10)
                     .toList();
             }
 
