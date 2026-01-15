@@ -9,8 +9,6 @@ public class PasswordUtil {
     
     /**
      * Hash mật khẩu bằng BCrypt
-     * @param plainPassword Mật khẩu dạng plain text
-     * @return Mật khẩu đã được hash
      */
     public static String hashPassword(String plainPassword) {
         if (plainPassword == null || plainPassword.isEmpty()) {

@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `mobilestore` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `mobilestore`;
 -- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: 127.0.0.1    Database: mobilestore
@@ -34,7 +32,7 @@ CREATE TABLE `cart` (
   KEY `FKg5uhi8vpsuy0lgloxk2h4w5o6` (`user_id`),
   CONSTRAINT `FKg5uhi8vpsuy0lgloxk2h4w5o6` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   CONSTRAINT `FKpu4bcbluhsxagirmbdn7dilm5` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -88,7 +86,7 @@ CREATE TABLE `order_details` (
   KEY `FK4q98utpd73imf4yhttm3w0eax` (`product_id`),
   CONSTRAINT `FK4q98utpd73imf4yhttm3w0eax` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`),
   CONSTRAINT `FKjyu2qbqt8gnvno9oe9j2s2ldk` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -97,6 +95,7 @@ CREATE TABLE `order_details` (
 
 LOCK TABLES `order_details` WRITE;
 /*!40000 ALTER TABLE `order_details` DISABLE KEYS */;
+INSERT INTO `order_details` VALUES (15,15000000,3,10,31),(16,12500000,1,10,30),(17,25000000,1,10,29),(18,17000000,1,10,27),(19,15000000,1,11,31),(20,15000000,2,12,31),(21,12500000,2,12,30),(22,14500000,1,12,24),(23,15000000,1,13,28),(24,25000000,1,13,29),(25,29000000,1,13,26),(26,14500000,2,14,24),(27,15000000,1,14,31),(28,17000000,1,14,27),(29,20000000,3,15,33);
 /*!40000 ALTER TABLE `order_details` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -116,7 +115,7 @@ CREATE TABLE `orders` (
   PRIMARY KEY (`order_id`),
   KEY `FK32ql8ubntj5uh44ph9659tiih` (`user_id`),
   CONSTRAINT `FK32ql8ubntj5uh44ph9659tiih` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -125,6 +124,7 @@ CREATE TABLE `orders` (
 
 LOCK TABLES `orders` WRITE;
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
+INSERT INTO `orders` VALUES (10,'PENDING','2025-12-30 13:31:16.216000',99500000,6),(11,'PENDING','2026-01-10 18:04:13.043000',15000000,5),(12,'PENDING','2026-01-15 05:34:24.770000',69500000,6),(13,'PENDING','2026-01-15 05:40:28.878000',69000000,6),(14,'PENDING','2026-01-15 06:46:16.934000',61000000,6),(15,'PROCESSING','2026-01-16 08:25:12.955000',60000000,6);
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -172,7 +172,7 @@ CREATE TABLE `products` (
   PRIMARY KEY (`product_id`),
   KEY `FKog2rp4qthbtt2lfyhfo32lsw9` (`category_id`),
   CONSTRAINT `FKog2rp4qthbtt2lfyhfo32lsw9` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -181,7 +181,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,'images/products/ac1986ad-dd57-4917-a12c-691bedeab194.png','APPLE',30000000,'IPHONE 15 PRO','Mới','',22,1),(5,'images/products/177547fb-d043-4c42-a1a3-2f52c1355b63.webp','APPLE',100000000,'IPAB MINI 6','Mới','',10,2);
+INSERT INTO `products` VALUES (10,'images/products/963928d2-cfb7-4960-8d3b-eee890c82d72.png','APPLE',12000000,'iPhone 17 pro','Mới','',20,1),(11,'images/products/a773815c-3857-4466-86d5-84209c7f2b37.png','APPLE',25000000,'iPhone 15 pro','Mới','',10,1),(12,'images/products/01d57027-ac66-4333-9098-38ee7861c181.png','APPLE',7000000,'iPhone XR','Mới','',50,1),(13,'images/products/2ff2f283-7386-4e96-a91c-6d89ef259bbe.png','APPLE',9000000,'iPhone 11','Mới','',50,1),(14,'images/products/2d5c3d94-c977-4dc8-b2fa-2192fe1eb282.png','APPLE',13000000,'iPhone 13','Mới','',40,1),(15,'images/products/1693a3e0-f704-43e2-b735-d1b45b8bc5b9.png','APPLE',15000000,'iPhone 14','Mới','',30,1),(16,'images/products/51319fad-853d-4cd3-9f65-2da560db816a.png','APPLE',19000000,'iPhone 14 Pro','Mới','',25,1),(17,'images/products/0b7a70ec-43ce-48d4-b1f4-acf7a28b2ab3.png','APPLE',18000000,'iPhone 15','Mới','',30,1),(18,'images/products/33aca89a-fbc1-4921-829c-4e5b9137d9eb.png','APPLE',28000000,'iPhone 15 Pro Max','Mới','',20,1),(19,'images/products/0f11c558-01e9-4d63-a30c-77f597d98238.png','APPLE',22000000,'iPhone 16','Mới','',50,1),(20,'images/products/5a37c593-51bf-4b7b-adbc-d0bfcd620f8e.png','APPLE',24000000,'iPhone 16 Plus','Mới','',30,1),(21,'images/products/1ecdc28a-6a10-4bec-a7d6-6ad8a89af80a.png','APPLE',26000000,'iPhone 17','Mới','',100,1),(23,'images/products/b6dc74a6-da46-467d-aaa5-533b18c859fa.png','APPLE',10500000,'iPad Gen 10','Mới','',40,2),(24,'images/products/0af0a633-b612-4218-b042-ef822e99264f.png','APPLE',14500000,'iPad Air 5 M1','Mới','',22,2),(25,'images/products/de33773e-bc38-46c8-a7f0-cd1e7e71d655.png','APPLE',7500000,'iPad Gen 9','Mới','',50,2),(26,'images/products/prom4.png','APPLE',29000000,'iPad Pro M4','Mới','',14,2),(27,'images/products/0c334961-a3e2-4b40-93f1-b45bce5ce52a.png','APPLE',17000000,'iPad Air M2','Mới','',18,2),(28,'images/products/mini7.png','APPLE',15000000,'iPad mini 7','Mới','',19,2),(29,'images/products/mini_6.png','APPLE',25000000,'iPad mini 6','Mới','',28,2),(30,'images/products/12.png','APPLE',12500000,'iPhone 12','Mới','',27,1),(31,'images/products/16e.png','APPLE',15000000,'iPhone 16e','Mới','',13,1),(32,'images/products/4eef0b69-5658-4014-b9ff-d65881d378b3.png','APPLE',500000000,'iPad M4 Pro','Mới','',100,2),(33,'images/products/07fb6758-a24f-4993-8141-92dcbe635838.png','APPLE',20000000,'iPad M5 Pro','Mới','',47,2);
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -252,7 +252,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `UKr43af9ap4edm43mmtq01oddj6` (`username`),
   KEY `FK6e7f1kfvvn2k48olww485qvo3` (`role_name`),
   CONSTRAINT `FK6e7f1kfvvn2k48olww485qvo3` FOREIGN KEY (`role_name`) REFERENCES `roles` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -261,7 +261,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (2,'$2a$10$FYXBZKdE/4e1M5vUiBuRwu6SpPgmz75lpe02aw0p.gQdrGgbPnMc6','admin','ADMIN'),(3,'$2a$10$czJykfpeXDEs0fTZzhwl1.rofjjkQBMJLShWU0qhEpXmC4n3L8R.W','Mạnh Trần','CUSTOMER'),(4,'12345678','tai','CUSTOMER'),(5,'$2a$10$342ro1UObsU/8YP0Dy1HNOQ92Fxy3hYI/KLTc0ygh7j5Q6NyeIyP6','levantai','ADMIN');
+INSERT INTO `users` VALUES (5,'$2a$10$342ro1UObsU/8YP0Dy1HNOQ92Fxy3hYI/KLTc0ygh7j5Q6NyeIyP6','levantai','ADMIN'),(6,'$2a$10$w0KzLYHDgs5PI0Q4r3BjRu9RM3UbNa4IHSnfIb74KrHsTAlOnRfzW','mạnh','CUSTOMER'),(7,'$2a$10$bj4SkPMUK3jTJ7FD.9blzeYmCo.bUF5vd1wJVh2ldpIxQ8F5DHetG','Hưng','CUSTOMER');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -274,4 +274,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-21 22:11:49
+-- Dump completed on 2026-03-02 12:35:23
