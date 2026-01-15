@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -468,17 +469,22 @@
                                     </c:otherwise>
                                 </c:choose>
                             </div>
-                            <div style="font-weight:600; margin-bottom:0.25rem;">${product.productName}</div>
-                            <div style="color:#666; font-size:0.9rem; margin-bottom:0.5rem;">${product.manufacturer}</div>
-                            <div style="font-weight:700; color:#0071e3; margin-bottom:0.5rem;">
+                            <div style="font-weight:600; margin-bottom:0.25rem; font-size:1rem; line-height:1.3;">${product.productName}</div>
+                            <div style="color:#666; font-size:0.9rem; margin-bottom:0.25rem;">${product.manufacturer}</div>
+                            <div style="font-weight:700; font-size:1.1rem; color:#0071e3; margin-bottom:0.5rem; display:flex; align-items:center;">
                                 <fmt:formatNumber value="${product.price}" type="number" groupingUsed="true"/>₫
                             </div>
-                            <div style="font-size:0.9rem; color:#888;">
+                            <div style="font-size:0.9rem; color:#888; margin-bottom:0.75rem;">
                                 <c:choose>
                                     <c:when test="${product.quantityInStock == 0}">Hết hàng</c:when>
                                     <c:otherwise>Tồn kho: ${product.quantityInStock}</c:otherwise>
                                 </c:choose>
                             </div>
+                            <button class="btn add-to-cart-btn" data-id="${product.id}"
+                                    data-stock="${product.quantityInStock}"
+                                    style="width:100%; padding:0.5rem; font-size:0.9rem;">
+                                Thêm vào giỏ
+                            </button>
                         </a>
                     </div>
                 </c:forEach>
@@ -515,6 +521,95 @@
             <p>Địa chỉ: 123 Đường ABC, Quận XYZ, TP.HCM | Hotline: 0123-456-789</p>
         </div>
     </footer>
+
+    <script>
+        function refreshCartCount() {
+            fetch('${pageContext.request.contextPath}/cart/count')
+                .then(r => r.json())
+                .then(data => {
+                    const el = document.getElementById('cartCount');
+                    if (el) el.textContent = data.count;
+                }).catch(() => {});
+        }
+
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const productId = this.getAttribute('data-id');
+                const stock = parseInt(this.getAttribute('data-stock') || '0', 10);
+                if (stock <= 0) {
+                    showToast('Sản phẩm đã hết hàng');
+                    return;
+                }
+
+                fetch('${pageContext.request.contextPath}/cart?action=add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin',
+                    body: 'productId=' + encodeURIComponent(productId) + '&quantity=1'
+                }).then(async res => {
+                    if (res.status === 401) {
+                        const json = await res.json().catch(() => null);
+                        if (json && json.redirect) {
+                            window.location.href = json.redirect;
+                            return;
+                        }
+                        throw new Error('Vui lòng đăng nhập để tiếp tục');
+                    }
+                    if (!res.ok) {
+                        const txt = await res.text().catch(() => null);
+                        let msg = 'Lỗi khi thêm vào giỏ';
+                        try {
+                            msg = JSON.parse(txt).message || txt || msg;
+                        } catch (e) {
+                            msg = txt || msg;
+                        }
+                        throw new Error(msg);
+                    }
+                    return res.json().catch(() => null);
+                }).then(json => {
+                    if (json && json.count !== undefined) {
+                        const el = document.getElementById('cartCount');
+                        if (el) el.textContent = json.count;
+                        showToast('Đã thêm vào giỏ hàng');
+                    } else {
+                        refreshCartCount();
+                        showToast('Đã thêm vào giỏ hàng');
+                    }
+                }).catch(err => {
+                    console.error('Add to cart failed', err);
+                    alert(err.message || 'Lỗi khi thêm vào giỏ');
+                });
+            });
+        });
+
+        function showToast(message) {
+            let t = document.getElementById('toastMessage');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'toastMessage';
+                t.style.position = 'fixed';
+                t.style.right = '16px';
+                t.style.bottom = '16px';
+                t.style.background = '#111';
+                t.style.color = '#fff';
+                t.style.padding = '10px 14px';
+                t.style.borderRadius = '8px';
+                t.style.zIndex = 9999;
+                document.body.appendChild(t);
+            }
+            t.textContent = message;
+            t.style.opacity = '1';
+            setTimeout(() => {
+                t.style.opacity = '0';
+            }, 2000);
+        }
+
+        // init
+        refreshCartCount();
+    </script>
 </body>
 </html>
 
