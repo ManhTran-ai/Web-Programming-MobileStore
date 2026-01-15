@@ -75,8 +75,9 @@
             opacity: 0.7;
         }
 
-        table{width:100%;border-collapse:collapse}
+        table{width:100%;border-collapse:collapse;margin-bottom:20px}
         th,td{padding:12px;border:1px solid #ddd;text-align:left}
+        th{font-weight:600}
         .qty-controls {display:flex;gap:8px;align-items:center}
         .btn{padding:8px 12px;border-radius:6px;background:#111;color:#fff;text-decoration:none;border:none;cursor:pointer}
         .btn.secondary{background:#e5e5ea;color:#111}
@@ -85,6 +86,39 @@
         @media (max-width: 768px) {
             .container {
                 padding: 0 12px;
+            }
+
+            main.container {
+                padding-top: 80px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px 4px;
+            }
+
+            .qty-controls {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .btn {
+                padding: 6px 10px;
+                font-size: 14px;
+            }
+
+            .container > div:last-child {
+                padding: 16px;
+            }
+
+            .container > div:last-child > div:first-child {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                margin-bottom: 12px;
             }
         }
     </style>
@@ -117,7 +151,7 @@
     </div>
 </header>
 
-    <main class="container">
+    <main class="container" style="padding-top: 100px;">
         <div style="padding: 2rem 0;">
             <h1>Giỏ Hàng Của Bạn</h1>
         <c:choose>
@@ -168,10 +202,17 @@
                 </table>
                 </form>
 
-                <div style="margin-top:16px;text-align:right">
-                    <p>Tạm tính: <strong><fmt:formatNumber value="${total}" type="number" groupingUsed="true"/>₫</strong></p>
-                    <a class="btn secondary" href="${pageContext.request.contextPath}/products">Tiếp Tục Mua Sắm</a>
-                    <a class="btn" href="${pageContext.request.contextPath}/checkout">Thanh Toán</a>
+                <div style="margin-top:20px;padding:20px;background:#f8f8f8;border-radius:8px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <span style="font-size:1.2rem;font-weight:600;">Tạm tính:</span>
+                        <span style="font-size:1.4rem;font-weight:700;color:#0071e3;">
+                            <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/>₫
+                        </span>
+                    </div>
+                    <div style="display:flex;gap:12px;justify-content:flex-end;">
+                        <a class="btn secondary" href="${pageContext.request.contextPath}/products">Tiếp Tục Mua Sắm</a>
+                        <a class="btn" href="${pageContext.request.contextPath}/checkout">Thanh Toán</a>
+                    </div>
                 </div>
             </c:otherwise>
         </c:choose>

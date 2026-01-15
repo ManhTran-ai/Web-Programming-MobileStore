@@ -2,6 +2,9 @@ package com.mobilestore.controller.admin;
 
 import com.mobilestore.dao.CategoryDAO;
 import com.mobilestore.dao.ProductDAO;
+import com.mobilestore.dto.FileUploadResult;
+import com.mobilestore.dto.ProductFormData;
+import com.mobilestore.dto.ValidationResult;
 import com.mobilestore.entity.Category;
 import com.mobilestore.entity.Product;
 import jakarta.servlet.ServletException;
@@ -463,9 +466,6 @@ public class AdminProductServlet extends HttpServlet {
                 String fallback = getServletContext().getRealPath("") + File.separator + imagePath;
                 file = new File(fallback);
             }
-            if (file == null) {
-                return;
-            }
             String actualPath = file.getAbsolutePath();
             if (file.exists()) {
                 boolean deleted = file.delete();
@@ -697,88 +697,5 @@ public class AdminProductServlet extends HttpServlet {
         request.getRequestDispatcher("/views/admin/products/product-form.jsp").forward(request, response);
     }
 
-    // ==================== Inner Classes ====================
-
-    /**
-     * Class chứa kết quả upload file
-     */
-    private static class FileUploadResult {
-        private final boolean success;
-        private final String filePath;
-        private final String errorMessage;
-
-        public FileUploadResult(boolean success, String filePath, String errorMessage) {
-            this.success = success;
-            this.filePath = filePath;
-            this.errorMessage = errorMessage;
-        }
-
-        public boolean isSuccess() { return success; }
-        public String getFilePath() { return filePath; }
-        public String getErrorMessage() { return errorMessage; }
-    }
-
-    /**
-     * Class chứa kết quả validation
-     */
-    private static class ValidationResult {
-        private final boolean valid;
-        private final String errorCode;
-
-        public ValidationResult(boolean valid, String errorCode) {
-            this.valid = valid;
-            this.errorCode = errorCode;
-        }
-
-        public boolean isValid() { return valid; }
-        public String getErrorCode() { return errorCode; }
-    }
-
-    /**
-     * Class chứa dữ liệu form và validation errors
-     */
-    public static class ProductFormData {
-        private Integer id;
-        private String productName;
-        private String manufacturer;
-        private String productCondition;
-        private Float price;
-        private Integer quantityInStock;
-        private String productInfo;
-        private String newCategoryName;
-        private Integer categoryId;
-        private List<String> errors = new ArrayList<>();
-
-        public boolean isValid() { return errors.isEmpty(); }
-        public void addError(String error) { errors.add(error); }
-        public List<String> getErrors() { return errors; }
-
-        // Getters and Setters
-        public Integer getId() { return id; }
-        public void setId(Integer id) { this.id = id; }
-
-        public String getProductName() { return productName; }
-        public void setProductName(String productName) { this.productName = productName; }
-
-        public String getManufacturer() { return manufacturer; }
-        public void setManufacturer(String manufacturer) { this.manufacturer = manufacturer; }
-
-        public String getProductCondition() { return productCondition; }
-        public void setProductCondition(String productCondition) { this.productCondition = productCondition; }
-
-        public Float getPrice() { return price; }
-        public void setPrice(Float price) { this.price = price; }
-
-        public Integer getQuantityInStock() { return quantityInStock; }
-        public void setQuantityInStock(Integer quantityInStock) { this.quantityInStock = quantityInStock; }
-
-        public String getProductInfo() { return productInfo; }
-        public void setProductInfo(String productInfo) { this.productInfo = productInfo; }
-
-        public Integer getCategoryId() { return categoryId; }
-        public void setCategoryId(Integer categoryId) { this.categoryId = categoryId; }
-        public String getNewCategoryName() { return newCategoryName; }
-        public void setNewCategoryName(String newCategoryName) { this.newCategoryName = newCategoryName; }
-    }
 }
 
