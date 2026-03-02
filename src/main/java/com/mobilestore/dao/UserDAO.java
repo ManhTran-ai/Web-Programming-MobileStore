@@ -18,7 +18,8 @@ public class UserDAO {
      * @return User object nếu tìm thấy, null nếu không
      */
     public User findByUsername(String username) {
-        String sql = "SELECT u.id, u.username, u.password, u.role_name, r.description as role_description " +
+        String sql = "SELECT u.id, u.username, u.password, u.role_name, r.description as role_description, " +
+                     "u.oauth_provider, u.oauth_id, u.email " +
                      "FROM users u " +
                      "LEFT JOIN roles r ON u.role_name = r.name " +
                      "WHERE u.username = ?";
@@ -46,7 +47,8 @@ public class UserDAO {
      * @return User object nếu tìm thấy, null nếu không
      */
     public User findById(Integer id) {
-        String sql = "SELECT u.id, u.username, u.password, u.role_name, r.description as role_description " +
+        String sql = "SELECT u.id, u.username, u.password, u.role_name, r.description as role_description, " +
+                     "u.oauth_provider, u.oauth_id, u.email " +
                      "FROM users u " +
                      "LEFT JOIN roles r ON u.role_name = r.name " +
                      "WHERE u.id = ?";
@@ -74,7 +76,8 @@ public class UserDAO {
      */
     public List<User> findAll() {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT u.id, u.username, u.password, u.role_name, r.description as role_description " +
+        String sql = "SELECT u.id, u.username, u.password, u.role_name, r.description as role_description, " +
+                     "u.oauth_provider, u.oauth_id, u.email " +
                      "FROM users u " +
                      "LEFT JOIN roles r ON u.role_name = r.name";
         
@@ -188,7 +191,78 @@ public class UserDAO {
             user.setRole(role);
         }
         
+        // OAuth fields
+        user.setOauthProvider(rs.getString("oauth_provider"));
+        user.setOauthId(rs.getString("oauth_id"));
+        user.setEmail(rs.getString("email"));
+        
         return user;
+    }
+    
+    /**
+     * Tìm user theo oauth_id và oauth_provider
+     * @param oauthId OAuth ID từ provider
+     * @param oauthProvider Provider ('google', 'facebook')
+     * @return User object nếu tìm thấy, null nếu không
+     */
+    public User findByOauthId(String oauthId, String oauthProvider) {
+        String sql = "SELECT u.id, u.username, u.password, u.role_name, r.description as role_description, " +
+                     "u.oauth_provider, u.oauth_id, u.email " +
+                     "FROM users u " +
+                     "LEFT JOIN roles r ON u.role_name = r.name " +
+                     "WHERE u.oauth_id = ? AND u.oauth_provider = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, oauthId);
+            ps.setString(2, oauthProvider);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToUser(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm user theo oauth_id: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    /**
+     * Tạo user mới từ OAuth (không có password)
+     * @param user User object cần tạo
+     * @return User đã được tạo với ID, null nếu thất bại
+     */
+    public User createWithOAuth(User user) {
+        String sql = "INSERT INTO users (username, password, role_name, oauth_provider, oauth_id, email) VALUES (?, ?, ?, ?, ?, ?)";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
+            ps.setString(1, user.getUsername());
+            ps.setString(2, user.getPassword() != null ? user.getPassword() : null); // Null password for OAuth
+            ps.setString(3, user.getRole() != null ? user.getRole().getName() : "CUSTOMER");
+            ps.setString(4, user.getOauthProvider());
+            ps.setString(5, user.getOauthId());
+            ps.setString(6, user.getEmail());
+            
+            int affectedRows = ps.executeUpdate();
+            
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        user.setId(generatedKeys.getInt(1));
+                        return user;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tạo user OAuth: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
 }
 

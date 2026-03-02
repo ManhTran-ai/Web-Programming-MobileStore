@@ -17,4 +17,7 @@ public class User {
     private String username;
     private String password;
     private Role role;
+    private String oauthProvider;  // 'google', 'facebook', null
+    private String oauthId;        // ID từ Google/Facebook
+    private String email;
 }
