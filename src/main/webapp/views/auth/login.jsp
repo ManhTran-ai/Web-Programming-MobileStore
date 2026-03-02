@@ -6,6 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập</title>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -84,6 +86,47 @@
             background: #333;
             transform: translateY(-1px);
         }
+        .btn-google {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 14px 16px;
+            background: #ffffff;
+            color: #3c4043;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+        .btn-google:hover {
+            background: #f8f9fa;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .btn-google img {
+            width: 20px;
+            height: 20px;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: #5f6368;
+            font-size: 0.85rem;
+        }
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #dadce0;
+        }
+        .divider span {
+            padding: 0 1rem;
+        }
         .error { 
             color: #b91c1c; 
             margin-bottom: 1rem; 
@@ -159,7 +202,7 @@
                     <c:if test="${not empty success}">
                         <div class="success">${success}</div>
                     </c:if>
-                    <form method="post" action="${pageContext.request.contextPath}/login">
+                    <form method="post" action="${pageContext.request.contextPath}/login" id="passwordForm">
                         <div class="field">
                             <label for="username">Tên đăng nhập</label>
                             <input type="text" id="username" name="username" required />
@@ -170,6 +213,14 @@
                         </div>
                         <button class="btn" type="submit">Đăng nhập</button>
                     </form>
+                    
+                    <div class="divider"><span>hoặc</span></div>
+                    
+                    <!-- Google Sign-In Button -->
+                    <button type="button" class="btn-google" onclick="loginWithGoogle()">
+                        <img src="https://www.google.com/favicon.ico" alt="Google" />
+                        Đăng nhập bằng Google
+                    </button>
                     <div class="helper">
                         Chưa có tài khoản? <a href="${pageContext.request.contextPath}/register">Đăng ký ngay</a>
                     </div>
@@ -181,6 +232,40 @@
         </div>
     </section>
     <script>
+        // Google Client ID từ Google Cloud Console
+        const GOOGLE_CLIENT_ID = "744565146565-ncqm19qq1eq9d0cq7l0q9k4ig88bnel5.apps.googleusercontent.com";
+        
+        function loginWithGoogle() {
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleCredentialResponse,
+                auto_select: false,
+                cancel_on_tap_outside: false
+            });
+            
+            // Hiển thị popup đăng nhập Google
+            google.accounts.id.prompt();
+        }
+        
+        function handleCredentialResponse(response) {
+            // response.credential chứa JWT ID token
+            if (response.credential) {
+                // Tạo form ẩn để submit ID token về server
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '${pageContext.request.contextPath}/login';
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id_token';
+                input.value = response.credential;
+                
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+        
         function refreshCartCount() {
             fetch('${pageContext.request.contextPath}/cart/count')
                 .then(r => r.json())

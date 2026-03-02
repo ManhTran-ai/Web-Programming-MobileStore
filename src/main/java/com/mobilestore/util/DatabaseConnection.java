@@ -31,39 +31,12 @@ public class DatabaseConnection {
         try {
             Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             if (connection != null) {
-                System.out.println("✅ Kết nối database thành công!");
+                System.out.println("Kết nối database thành công!");
             }
             return connection;
         } catch (SQLException e) {
-            System.err.println("❌ Lỗi kết nối database: " + e.getMessage());
+            System.err.println("Lỗi kết nối database: " + e.getMessage());
             throw e;
-        }
-    }
-    
-    /**
-     * Test kết nối database
-     * @return true nếu kết nối thành công, false nếu không
-     */
-    public static boolean testConnection() {
-        try (Connection connection = getConnection()) {
-            return connection != null && !connection.isClosed();
-        } catch (SQLException e) {
-            System.err.println("❌ Test kết nối thất bại: " + e.getMessage());
-            return false;
-        }
-    }
-    
-    /**
-     * Đóng connection an toàn
-     * @param connection Connection cần đóng
-     */
-    public static void closeConnection(Connection connection) {
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                System.err.println("❌ Lỗi khi đóng connection: " + e.getMessage());
-            }
         }
     }
 }
