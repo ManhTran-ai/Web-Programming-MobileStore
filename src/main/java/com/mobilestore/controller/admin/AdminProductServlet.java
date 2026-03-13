@@ -21,15 +21,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 
-/**
- * Servlet xử lý quản lý sản phẩm cho Admin
- * Sử dụng Jakarta Servlet 6.0 native Part API cho file upload
- */
 @WebServlet(name = "AdminProductServlet", urlPatterns = {"/admin/products", "/admin/products/*"})
 @MultipartConfig(
-    fileSizeThreshold = 1024 * 1024,      // 1 MB - lưu vào memory trước khi ghi ra disk
-    maxFileSize = 1024 * 1024 * 10,        // 10 MB - max size cho 1 file
-    maxRequestSize = 1024 * 1024 * 50      // 50 MB - max size cho toàn bộ request
+    fileSizeThreshold = 1024 * 1024,
+    maxFileSize = 1024 * 1024 * 10,
+    maxRequestSize = 1024 * 1024 * 50
 )
 public class AdminProductServlet extends HttpServlet {
 
@@ -37,26 +33,18 @@ public class AdminProductServlet extends HttpServlet {
     private final ProductDAO productDAO = new ProductDAO();
     private final CategoryDAO categoryDAO = new CategoryDAO();
 
-    // Thư mục lưu ảnh sản phẩm (đường dẫn tương đối trong webapp, được lưu vào DB)
     private static final String UPLOAD_DIR = "images/products";
-    // UPLOAD_ROOT: đặt thành đường dẫn tuyệt đối tới thư mục webapp source để lưu trực tiếp vào source
-    // Bạn yêu cầu lưu ảnh vào: D:\Web-Programming-MobileStore\src\main\webapp\images\products
-    // Do đó UPLOAD_ROOT sẽ trỏ tới webapp root:
-    private static final String UPLOAD_ROOT = "D:\\\\Web-Programming-MobileStore\\\\src\\\\main\\\\webapp";
+    private static final String UPLOAD_ROOT = "D:\\Web-Programming-MobileStore\\src\\main\\webapp";
 
-    // Allowed image extensions
     private static final Set<String> ALLOWED_EXTENSIONS = new HashSet<>(
         Arrays.asList(".jpg", ".jpeg", ".png", ".gif", ".webp")
     );
 
-    // Allowed MIME types
     private static final Set<String> ALLOWED_MIME_TYPES = new HashSet<>(
         Arrays.asList("image/jpeg", "image/png", "image/gif", "image/webp")
     );
 
-    // Max file size (10MB)
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
-
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -95,16 +83,12 @@ public class AdminProductServlet extends HttpServlet {
         } else if (pathInfo != null && pathInfo.equals("/edit")) {
             processEditProduct(request, response);
         } else if (pathInfo != null && pathInfo.equals("/delete")) {
-            // Hỗ trợ POST cho delete (more secure)
             processDeleteProduct(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
-    /**
-     * Hiển thị danh sách sản phẩm
-     */
     private void showProductList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         List<Product> products = productDAO.findAll();
@@ -112,9 +96,6 @@ public class AdminProductServlet extends HttpServlet {
         request.getRequestDispatcher("/views/admin/products/product-list.jsp").forward(request, response);
     }
 
-    /**
-     * Hiển thị form thêm sản phẩm
-     */
     private void showAddForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         List<Category> categories = categoryDAO.findAll();
@@ -123,14 +104,10 @@ public class AdminProductServlet extends HttpServlet {
         request.getRequestDispatcher("/views/admin/products/product-form.jsp").forward(request, response);
     }
 
-    /**
-     * Hiển thị form sửa sản phẩm
-     */
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String idParam = request.getParameter("id");
 
-        // Validate ID
         ValidationResult idValidation = validateId(idParam);
         if (!idValidation.isValid()) {
             response.sendRedirect(request.getContextPath() + "/admin/products?error=" + idValidation.getErrorCode());
@@ -152,13 +129,9 @@ public class AdminProductServlet extends HttpServlet {
         request.getRequestDispatcher("/views/admin/products/product-form.jsp").forward(request, response);
     }
 
-    /**
-     * Xử lý thêm sản phẩm mới
-     */
     private void processAddProduct(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Lấy và validate dữ liệu từ form
         ProductFormData formData = extractAndValidateFormData(request, false);
 
         if (!formData.isValid()) {
@@ -167,7 +140,6 @@ public class AdminProductServlet extends HttpServlet {
         }
 
         try {
-            // Xử lý upload hình ảnh sử dụng Jakarta Part API
             FileUploadResult uploadResult = processImageUpload(request);
             if (!uploadResult.isSuccess() && uploadResult.getErrorMessage() != null) {
                 formData.addError(uploadResult.getErrorMessage());
@@ -175,7 +147,6 @@ public class AdminProductServlet extends HttpServlet {
                 return;
             }
 
-            // Tạo đối tượng Product
             Product product = new Product();
             product.setProductName(formData.getProductName());
             product.setManufacturer(formData.getManufacturer());
@@ -188,14 +159,13 @@ public class AdminProductServlet extends HttpServlet {
             Category category = new Category();
             category.setId(formData.getCategoryId());
             product.setCategory(category);
-            // Kiểm tra sản phẩm đã tồn tại (theo tên, nhà sản xuất, tình trạng, danh mục)
+
             Product existing = productDAO.findByUniqueKey(product.getProductName(),
                     product.getManufacturer(),
                     product.getProductCondition(),
                     product.getCategory() != null ? product.getCategory().getId() : null);
 
             if (existing != null) {
-                // Nếu tồn tại, chỉ tăng số lượng
                 int newQty = existing.getQuantityInStock() + product.getQuantityInStock();
                 existing.setQuantityInStock(newQty);
                 boolean updated = productDAO.update(existing);
@@ -208,7 +178,6 @@ public class AdminProductServlet extends HttpServlet {
                 return;
             }
 
-            // Nếu chưa tồn tại, lưu sản phẩm mới
             Product createdProduct = productDAO.create(product);
 
             if (createdProduct != null) {
@@ -226,9 +195,6 @@ public class AdminProductServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Xử lý cập nhật sản phẩm
-     */
     private void processEditProduct(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -247,7 +213,6 @@ public class AdminProductServlet extends HttpServlet {
             return;
         }
 
-        // Lấy và validate dữ liệu từ form
         ProductFormData formData = extractAndValidateFormData(request, true);
         formData.setId(id);
 
@@ -257,7 +222,6 @@ public class AdminProductServlet extends HttpServlet {
         }
 
         try {
-            // Xử lý upload hình ảnh sử dụng Jakarta Part API
             FileUploadResult uploadResult = processImageUpload(request);
             if (!uploadResult.isSuccess() && uploadResult.getErrorMessage() != null) {
                 formData.addError(uploadResult.getErrorMessage());
@@ -265,16 +229,13 @@ public class AdminProductServlet extends HttpServlet {
                 return;
             }
 
-            // Nếu không upload ảnh mới, giữ ảnh cũ
             String imagePath = uploadResult.getFilePath();
             if (imagePath == null || imagePath.isEmpty()) {
                 imagePath = existingProduct.getImage();
             } else {
-                // Xóa ảnh cũ nếu có ảnh mới
                 deleteOldImage(existingProduct.getImage());
             }
 
-            // Cập nhật đối tượng Product
             existingProduct.setProductName(formData.getProductName());
             existingProduct.setManufacturer(formData.getManufacturer());
             existingProduct.setProductCondition(formData.getProductCondition());
@@ -287,7 +248,6 @@ public class AdminProductServlet extends HttpServlet {
             category.setId(formData.getCategoryId());
             existingProduct.setCategory(category);
 
-            // Cập nhật database
             boolean updated = productDAO.update(existingProduct);
 
             if (updated) {
@@ -304,9 +264,6 @@ public class AdminProductServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Xử lý xóa sản phẩm (GET request)
-     */
     private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         String idParam = request.getParameter("id");
@@ -318,7 +275,6 @@ public class AdminProductServlet extends HttpServlet {
             return;
         }
 
-        // Yêu cầu xác nhận qua parameter
         if (!"true".equals(confirm)) {
             response.sendRedirect(request.getContextPath() + "/admin/products?error=confirm_required&id=" + idParam);
             return;
@@ -328,9 +284,6 @@ public class AdminProductServlet extends HttpServlet {
         performDelete(id, request, response);
     }
 
-    /**
-     * Xử lý xóa sản phẩm (POST request - more secure)
-     */
     private void processDeleteProduct(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         String idParam = request.getParameter("id");
@@ -345,23 +298,17 @@ public class AdminProductServlet extends HttpServlet {
         performDelete(id, request, response);
     }
 
-    /**
-     * Thực hiện xóa sản phẩm
-     */
     private void performDelete(Integer id, HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        // Lấy thông tin sản phẩm trước khi xóa
         Product product = productDAO.findById(id);
         if (product == null) {
             response.sendRedirect(request.getContextPath() + "/admin/products?error=not_found");
             return;
         }
 
-        // Xóa sản phẩm
         boolean deleted = productDAO.delete(id);
 
         if (deleted) {
-            // Xóa file ảnh nếu có
             deleteOldImage(product.getImage());
             response.sendRedirect(request.getContextPath() + "/admin/products?success=deleted");
         } else {
@@ -369,46 +316,36 @@ public class AdminProductServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Xử lý upload hình ảnh sử dụng Jakarta Servlet 6.0 Part API
-     */
     private FileUploadResult processImageUpload(HttpServletRequest request) throws IOException, ServletException {
         Part filePart = request.getPart("image");
 
-        // Kiểm tra file có được upload không
         if (filePart == null || filePart.getSize() == 0) {
-            return new FileUploadResult(true, null, null); // No file uploaded, không phải lỗi
+            return new FileUploadResult(true, null, null);
         }
 
-        // Sử dụng Part.getSubmittedFileName() - Jakarta Servlet 6.0 native method
         String fileName = filePart.getSubmittedFileName();
         if (fileName == null || fileName.trim().isEmpty()) {
             return new FileUploadResult(true, null, null);
         }
 
-        // Validate file size
         if (filePart.getSize() > MAX_FILE_SIZE) {
             return new FileUploadResult(false, null, "Kích thước file không được vượt quá 10MB");
         }
 
-        // Validate file extension
         String extension = getFileExtension(fileName).toLowerCase();
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
             return new FileUploadResult(false, null,
                 "Định dạng file không được hỗ trợ. Chỉ chấp nhận: JPG, JPEG, PNG, GIF, WEBP");
         }
 
-        // Validate MIME type
         String contentType = filePart.getContentType();
         if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
             return new FileUploadResult(false, null,
                 "Loại file không hợp lệ. Chỉ chấp nhận file ảnh.");
         }
 
-        // Tạo tên file unique để tránh trùng lặp và bảo mật
         String uniqueFileName = UUID.randomUUID().toString() + extension;
 
-        // Lấy đường dẫn thực tế trên server hoặc sử dụng UPLOAD_ROOT nếu được cấu hình (giữ nguyên UPLOAD_DIR làm đường dẫn tương đối để lưu vào DB)
         String uploadPath;
         if (UPLOAD_ROOT != null && !UPLOAD_ROOT.trim().isEmpty()) {
             uploadPath = UPLOAD_ROOT + File.separator + UPLOAD_DIR;
@@ -416,7 +353,6 @@ public class AdminProductServlet extends HttpServlet {
             uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
         }
 
-        // Tạo thư mục nếu chưa tồn tại
         File uploadDir = new File(uploadPath);
         if (!uploadDir.exists()) {
             boolean created = uploadDir.mkdirs();
@@ -425,35 +361,25 @@ public class AdminProductServlet extends HttpServlet {
             }
         }
 
-        // Lưu file sử dụng Part.write() - Jakarta Servlet native method
         Path filePath = Paths.get(uploadPath, uniqueFileName);
         try (InputStream input = filePart.getInputStream()) {
             Files.copy(input, filePath, StandardCopyOption.REPLACE_EXISTING);
         }
 
-        // Trả về đường dẫn tương đối (lưu vào DB) - đảm bảo không có leading slash
         String dbPath = UPLOAD_DIR + "/" + uniqueFileName;
         if (dbPath.startsWith("/")) {
             dbPath = dbPath.substring(1);
         }
 
-        // Log thông tin lưu file để debug
-        System.out.println("Uploaded file saved to filesystem: " + filePath.toAbsolutePath());
-        System.out.println("Image DB path to store: " + dbPath);
-
         return new FileUploadResult(true, dbPath, null);
     }
 
-    /**
-     * Xóa file ảnh cũ
-     */
     private void deleteOldImage(String imagePath) {
         if (imagePath == null || imagePath.isEmpty()) {
             return;
         }
 
         try {
-            // Try configured upload root first, fallback to servlet context real path
             String fullPath = null;
             if (UPLOAD_ROOT != null && !UPLOAD_ROOT.trim().isEmpty()) {
                 fullPath = UPLOAD_ROOT + File.separator + imagePath;
@@ -478,9 +404,6 @@ public class AdminProductServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Lấy extension của file
-     */
     private String getFileExtension(String fileName) {
         int lastDot = fileName.lastIndexOf(".");
         if (lastDot > 0) {
@@ -489,13 +412,9 @@ public class AdminProductServlet extends HttpServlet {
         return "";
     }
 
-    /**
-     * Extract và validate dữ liệu từ form
-     */
     private ProductFormData extractAndValidateFormData(HttpServletRequest request, boolean isEdit) {
         ProductFormData formData = new ProductFormData();
 
-        // Extract data
         String productName = request.getParameter("productName");
         String manufacturer = request.getParameter("manufacturer");
         String productCondition = request.getParameter("productCondition");
@@ -505,14 +424,12 @@ public class AdminProductServlet extends HttpServlet {
         String categoryIdStr = request.getParameter("categoryId");
         String newCategoryName = request.getParameter("newCategoryName");
 
-        // Set raw values for re-display
         formData.setProductName(productName != null ? productName.trim() : "");
         formData.setManufacturer(manufacturer != null ? manufacturer.trim() : "");
         formData.setProductCondition(productCondition != null ? productCondition.trim() : "Mới");
         formData.setProductInfo(productInfo != null ? productInfo.trim() : "");
         formData.setNewCategoryName(newCategoryName != null ? newCategoryName.trim() : "");
 
-        // Validate productName
         if (productName == null || productName.trim().isEmpty()) {
             formData.addError("Tên sản phẩm không được để trống");
         } else if (productName.trim().length() < 2) {
@@ -521,14 +438,12 @@ public class AdminProductServlet extends HttpServlet {
             formData.addError("Tên sản phẩm không được vượt quá 255 ký tự");
         }
 
-        // Validate manufacturer
         if (manufacturer == null || manufacturer.trim().isEmpty()) {
             formData.addError("Nhà sản xuất không được để trống");
         } else if (manufacturer.trim().length() > 255) {
             formData.addError("Tên nhà sản xuất không được vượt quá 255 ký tự");
         }
 
-        // Validate price
         if (priceStr == null || priceStr.trim().isEmpty()) {
             formData.addError("Giá không được để trống");
         } else {
@@ -546,7 +461,6 @@ public class AdminProductServlet extends HttpServlet {
             }
         }
 
-        // Validate quantity
         if (quantityStr == null || quantityStr.trim().isEmpty()) {
             formData.addError("Số lượng không được để trống");
         } else {
@@ -564,12 +478,10 @@ public class AdminProductServlet extends HttpServlet {
             }
         }
 
-        // Validate category selection OR new category creation
         if ((categoryIdStr == null || categoryIdStr.trim().isEmpty())
                 && (newCategoryName == null || newCategoryName.trim().isEmpty())) {
             formData.addError("Vui lòng chọn danh mục hoặc nhập tên danh mục mới");
         } else if (newCategoryName != null && !newCategoryName.trim().isEmpty()) {
-            // Create or reuse category by name
             String name = newCategoryName.trim();
             if (name.length() > 255) {
                 formData.addError("Tên danh mục không được vượt quá 255 ký tự");
@@ -589,13 +501,11 @@ public class AdminProductServlet extends HttpServlet {
                 }
             }
         } else {
-            // Use selected category id
             try {
                 int categoryId = Integer.parseInt(categoryIdStr.trim());
                 if (categoryId <= 0) {
                     formData.addError("Danh mục không hợp lệ");
                 } else {
-                    // Kiểm tra category có tồn tại không
                     Category category = categoryDAO.findById(categoryId);
                     if (category == null) {
                         formData.addError("Danh mục không tồn tại");
@@ -608,7 +518,6 @@ public class AdminProductServlet extends HttpServlet {
             }
         }
 
-        // Validate productCondition
         if (productCondition == null || productCondition.trim().isEmpty()) {
             formData.setProductCondition("Mới");
         } else {
@@ -618,7 +527,6 @@ public class AdminProductServlet extends HttpServlet {
             }
         }
 
-        // Validate productInfo length
         if (productInfo != null && productInfo.length() > 1000) {
             formData.addError("Mô tả sản phẩm không được vượt quá 1000 ký tự");
         }
@@ -626,9 +534,6 @@ public class AdminProductServlet extends HttpServlet {
         return formData;
     }
 
-    /**
-     * Validate ID parameter
-     */
     private ValidationResult validateId(String idParam) {
         if (idParam == null || idParam.trim().isEmpty()) {
             return new ValidationResult(false, "missing_id");
@@ -644,9 +549,6 @@ public class AdminProductServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Set error và forward về form thêm sản phẩm
-     */
     private void setErrorAndForward(HttpServletRequest request, HttpServletResponse response,
                                     List<String> errors, ProductFormData formData)
             throws ServletException, IOException {
@@ -659,16 +561,12 @@ public class AdminProductServlet extends HttpServlet {
         request.getRequestDispatcher("/views/admin/products/product-form.jsp").forward(request, response);
     }
 
-    /**
-     * Set error và forward về form sửa sản phẩm
-     */
     private void setErrorAndForwardEdit(HttpServletRequest request, HttpServletResponse response,
                                         List<String> errors, ProductFormData formData, Integer id)
             throws ServletException, IOException {
         request.setAttribute("errors", errors);
         request.setAttribute("error", String.join("<br>", errors));
 
-        // Tạo product object từ formData để hiển thị lại
         Product product = new Product();
         product.setId(id);
         product.setProductName(formData.getProductName());
@@ -684,7 +582,6 @@ public class AdminProductServlet extends HttpServlet {
             product.setCategory(category);
         }
 
-        // Lấy ảnh cũ từ database
         Product existingProduct = productDAO.findById(id);
         if (existingProduct != null) {
             product.setImage(existingProduct.getImage());
@@ -696,6 +593,4 @@ public class AdminProductServlet extends HttpServlet {
         request.setAttribute("isEdit", true);
         request.getRequestDispatcher("/views/admin/products/product-form.jsp").forward(request, response);
     }
-
 }
-

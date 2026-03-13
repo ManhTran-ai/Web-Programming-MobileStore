@@ -29,7 +29,6 @@ public class CheckoutServlet extends HttpServlet {
         }
         List<CartItem> cart = (List<CartItem>) request.getSession().getAttribute("cart");
         if (cart == null || cart.isEmpty()) {
-            // try load from DB
             cart = cartDAO.findByUserId(user.getId());
             request.getSession().setAttribute("cart", cart);
         }
@@ -54,7 +53,6 @@ public class CheckoutServlet extends HttpServlet {
 
         Integer orderId = orderDAO.createOrder(user.getId(), total, cart);
         if (orderId != null) {
-            // clear cart session and DB
             request.getSession().removeAttribute("cart");
             cartDAO.clearCartByUser(user.getId());
             response.sendRedirect(request.getContextPath() + "/products?success=order_placed&id=" + orderId);
@@ -64,5 +62,3 @@ public class CheckoutServlet extends HttpServlet {
         }
     }
 }
-
-

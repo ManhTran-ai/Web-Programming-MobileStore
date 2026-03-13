@@ -12,33 +12,23 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 
-/**
- * Servlet phục vụ ảnh từ filesystem (UPLOAD_ROOT) hoặc fallback về webapp real path.
- * Map: /images/*
- */
 @WebServlet(name = "ImageServlet", urlPatterns = {"/images/*"})
 public class ImageServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    // Đồng bộ với AdminProductServlet.UPLOAD_ROOT nếu cần
-    private static final String UPLOAD_ROOT = "D:\\\\Web-Programming-MobileStore\\\\src\\\\main\\\\webapp";
+    private static final String UPLOAD_ROOT = "D:\\Web-Programming-MobileStore\\src\\main\\webapp";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String pathInfo = request.getPathInfo(); // e.g. /products/uuid.png
+        String pathInfo = request.getPathInfo();
         if (pathInfo == null || pathInfo.trim().isEmpty() || pathInfo.equals("/")) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
-        // Normalize remove leading slash
         String relative = pathInfo.startsWith("/") ? pathInfo.substring(1) : pathInfo;
 
-        // The saved images are stored under UPLOAD_ROOT/images/...
-        // Because this servlet is mapped to /images/*, pathInfo is the part after "/images/"
-        // e.g. request /images/products/xxx.png -> pathInfo = "/products/xxx.png" -> relative = "products/xxx.png"
-        // Therefore build filesystem path as UPLOAD_ROOT + File.separator + "images" + File.separator + relative
         File file = null;
         if (UPLOAD_ROOT != null && !UPLOAD_ROOT.trim().isEmpty()) {
             file = new File(UPLOAD_ROOT + File.separator + "images", relative);
@@ -48,7 +38,6 @@ public class ImageServlet extends HttpServlet {
         }
 
         if (file == null) {
-            // fallback to servlet context real path under webapp/images/...
             String fallbackPath = getServletContext().getRealPath("") + File.separator + "images" + File.separator + relative;
             file = new File(fallbackPath);
             if (!file.exists() || !file.isFile()) {
@@ -64,7 +53,6 @@ public class ImageServlet extends HttpServlet {
         response.setContentType(contentType);
         response.setContentLengthLong(file.length());
 
-        // Optional caching
         response.setHeader("Cache-Control", "public, max-age=86400");
 
         try (FileInputStream in = new FileInputStream(file);
@@ -77,5 +65,3 @@ public class ImageServlet extends HttpServlet {
         }
     }
 }
-
-

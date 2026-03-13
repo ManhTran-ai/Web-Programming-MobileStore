@@ -5,9 +5,6 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-/**
- * User entity - POJO class không sử dụng JPA annotations
- */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,4 +14,7 @@ public class User {
     private String username;
     private String password;
     private Role role;
+    private String oauthProvider;
+    private String oauthId;
+    private String email;
 }

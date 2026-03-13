@@ -64,13 +64,11 @@ public class AdminCategoryServlet extends HttpServlet {
 
 	private void showForm(HttpServletRequest request, HttpServletResponse response, boolean isEdit)
 			throws ServletException, IOException {
-		// We removed the separate category creation page. For "add" (isEdit == false) redirect to list.
 		if (!isEdit) {
 			response.sendRedirect(request.getContextPath() + "/admin/categories");
 			return;
 		}
 
-		// Edit flow: load category and forward to edit form if exists
 		request.setAttribute("isEdit", true);
 		String idParam = request.getParameter("id");
 		if (idParam == null) {
@@ -85,7 +83,6 @@ public class AdminCategoryServlet extends HttpServlet {
 				return;
 			}
 			request.setAttribute("category", category);
-			// Forward to list page for editing UI (list contains edit links)
 			request.getRequestDispatcher("/views/admin/categories/category-list.jsp").forward(request, response);
 		} catch (NumberFormatException e) {
 			response.sendRedirect(request.getContextPath() + "/admin/categories?error=invalid_id");
@@ -108,7 +105,6 @@ public class AdminCategoryServlet extends HttpServlet {
 			return;
 		}
 
-		// Kiểm tra trùng tên
 		if (categoryDAO.findByName(name.trim()) != null) {
 			request.setAttribute("error", "Danh mục đã tồn tại");
 			request.setAttribute("isEdit", false);
@@ -158,7 +154,6 @@ public class AdminCategoryServlet extends HttpServlet {
 				return;
 			}
 
-			// Nếu tên mới trùng với một category khác => lỗi
 			Category byName = categoryDAO.findByName(name.trim());
 			if (byName != null && !byName.getId().equals(id)) {
 				request.setAttribute("error", "Tên danh mục đã được sử dụng bởi danh mục khác");
@@ -217,5 +212,3 @@ public class AdminCategoryServlet extends HttpServlet {
 		}
 	}
 }
-
-

@@ -29,13 +29,11 @@ public class ProductsServlet extends HttpServlet {
         String requestURI = request.getRequestURI();
         String contextPath = request.getContextPath();
 
-        // Kiểm tra xem có phải request đến trang chi tiết sản phẩm không
         if (requestURI.equals(contextPath + "/products/view")) {
             handleProductDetail(request, response);
             return;
         }
 
-        // Xử lý danh sách sản phẩm (mặc định)
         int page = 1;
         int pageSize = 12;
         String pageParam = request.getParameter("page");
@@ -53,7 +51,6 @@ public class ProductsServlet extends HttpServlet {
         ProductDAO productDAO = new ProductDAO();
         CategoryDAO categoryDAO = new CategoryDAO();
 
-        // Xử lý category filter
         Integer categoryId = null;
         if (categoryParam != null && !categoryParam.trim().isEmpty()) {
             try {
@@ -65,9 +62,7 @@ public class ProductsServlet extends HttpServlet {
         int totalItems;
         int totalPages;
 
-        // Kiểm tra xem có tìm kiếm hay không
         if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
-            // Tìm kiếm với từ khóa và category filter
             totalItems = productDAO.countSearch(searchKeyword.trim(), categoryId);
             totalPages = (int) Math.ceil((double) totalItems / pageSize);
             if (page > totalPages && totalPages > 0) page = totalPages;
@@ -77,7 +72,6 @@ public class ProductsServlet extends HttpServlet {
 
             request.setAttribute("searchKeyword", searchKeyword.trim());
         } else if (categoryId != null) {
-            // Lọc theo category
             totalItems = productDAO.countSearch(null, categoryId);
             totalPages = (int) Math.ceil((double) totalItems / pageSize);
             if (page > totalPages && totalPages > 0) page = totalPages;
@@ -85,7 +79,6 @@ public class ProductsServlet extends HttpServlet {
 
             products = productDAO.searchWithFilter(null, categoryId, offset, pageSize);
         } else {
-            // Hiển thị tất cả sản phẩm
             totalItems = productDAO.countAll();
             totalPages = (int) Math.ceil((double) totalItems / pageSize);
             if (page > totalPages && totalPages > 0) page = totalPages;
@@ -94,7 +87,6 @@ public class ProductsServlet extends HttpServlet {
             products = productDAO.findPage(offset, pageSize);
         }
 
-        // Load danh sách categories cho dropdown filter
         List<com.mobilestore.entity.Category> categories = categoryDAO.findAll();
 
         request.setAttribute("products", products);
@@ -108,9 +100,6 @@ public class ProductsServlet extends HttpServlet {
         request.getRequestDispatcher("/views/products/product-list.jsp").forward(request, response);
     }
 
-    /**
-     * Xử lý hiển thị chi tiết sản phẩm
-     */
     private void handleProductDetail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -129,7 +118,6 @@ public class ProductsServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy sản phẩm");
                 return;
             }
-
 
             List<Product> relatedProducts = new ArrayList<>();
             if (product.getCategory() != null && product.getCategory().getId() != null) {
@@ -155,5 +143,3 @@ public class ProductsServlet extends HttpServlet {
         doGet(request, response);
     }
 }
-
-
