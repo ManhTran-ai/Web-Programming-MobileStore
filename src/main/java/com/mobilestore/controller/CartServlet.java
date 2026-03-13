@@ -23,15 +23,12 @@ public class CartServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Require login
         User user = (User) request.getSession().getAttribute("user");
         if (user == null) {
-            // redirect to login with return url
             response.sendRedirect(request.getContextPath() + "/login?redirect=" + request.getRequestURI());
             return;
         }
 
-        // Load cart from DB for user if session cart empty
         List<CartItem> cart = null;
         Object cartObj = request.getSession().getAttribute("cart");
         if (cartObj instanceof List) {
@@ -48,7 +45,6 @@ public class CartServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Actions: add, remove, update
         User user = (User) request.getSession().getAttribute("user");
         if (user == null) {
             String loginUrl = request.getContextPath() + "/login?redirect=" + request.getContextPath() + "/cart";
@@ -83,7 +79,6 @@ public class CartServlet extends HttpServlet {
                         cart = new ArrayList<>();
                         request.getSession().setAttribute("cart", cart);
                     }
-                    // check existing and compute new total quantity
                     boolean found = false;
                     int currentQty = 0;
                     for (CartItem item : cart) {
@@ -95,7 +90,6 @@ public class CartServlet extends HttpServlet {
                     }
                     int newQuantity = currentQty + quantity;
 
-                    // Validate stock
                     if (product.getQuantityInStock() < newQuantity) {
                         String msg;
                         if (product.getQuantityInStock() <= 0) {
@@ -110,13 +104,11 @@ public class CartServlet extends HttpServlet {
                             response.getWriter().print("{\"success\":false,\"message\":\"" + msg + "\"}");
                             return;
                         } else {
-                            // redirect back with error parameter (could be improved to flash)
                             response.sendRedirect(request.getContextPath() + "/products?error=" + java.net.URLEncoder.encode(msg, "UTF-8"));
                             return;
                         }
                     }
 
-                    // apply to session cart
                     if (found) {
                         for (CartItem item : cart) {
                             if (item.getProduct().getId().equals(product.getId())) {
@@ -128,14 +120,11 @@ public class CartServlet extends HttpServlet {
                         cart.add(new CartItem(product, newQuantity));
                     }
 
-                    // persist to DB with the new total quantity
                     cartDAO.upsertCartItem(user.getId(), product.getId(), newQuantity);
 
-                    // compute total quantity for response
                     int totalQty = 0;
                     for (CartItem it : cart) totalQty += it.getQuantity();
 
-                    // If AJAX request, return JSON; otherwise redirect
                     String xreq = request.getHeader("X-Requested-With");
                     if (xreq != null && "XMLHttpRequest".equalsIgnoreCase(xreq)) {
                         response.setContentType("application/json;charset=UTF-8");
@@ -146,7 +135,6 @@ public class CartServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/cart");
                 return;
             } catch (Exception e) {
-                // Log and return error
                 e.printStackTrace();
                 String xreq = request.getHeader("X-Requested-With");
                 if (xreq != null && "XMLHttpRequest".equalsIgnoreCase(xreq)) {
@@ -216,5 +204,3 @@ public class CartServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/cart");
     }
 }
-
-
