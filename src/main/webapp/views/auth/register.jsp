@@ -66,6 +66,37 @@
             outline: none; 
             border-color: #1a1a1a; 
         }
+        input.error {
+            border-color: #dc3545;
+            background-color: #fff5f5;
+        }
+        input.valid {
+            border-color: #28a745;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: none;
+        }
+        .field.error .error-message {
+            display: block;
+        }
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background: #e5e5e5;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            transition: width 0.3s, background 0.3s;
+        }
+        .password-strength-bar.weak { width: 33%; background: #dc3545; }
+        .password-strength-bar.medium { width: 66%; background: #ffc107; }
+        .password-strength-bar.strong { width: 100%; background: #28a745; }
         .btn { 
             display: block; 
             width: 100%; 
@@ -124,7 +155,6 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
 <header class="header">
     <div class="container">
         <div class="header-content">
@@ -135,7 +165,7 @@
                 <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng(<span id="cartCount">0</span>)</a>
                 <c:choose>
                     <c:when test="${not empty sessionScope.user}">
-                        <c:if test="${sessionScope.user.role.name == 'ADMIN'}">
+                        <c:if test="${sessionScope.user.roleName == 'ADMIN'}">
                             <a href="${pageContext.request.contextPath}/admin/products" style="color:#0071e3;">Trang
                                 Quản Lý</a>
                         </c:if>
@@ -152,7 +182,6 @@
     </div>
 </header>
 
-    <!-- Page Content -->
     <section class="page">
         <div class="container">
             <div class="center">
@@ -164,22 +193,37 @@
                     <c:if test="${not empty success}">
                         <div class="success">${success}</div>
                     </c:if>
-                    <form method="post" action="${pageContext.request.contextPath}/register">
-                        <div class="field">
+                    <form method="post" action="${pageContext.request.contextPath}/register" id="registerForm" novalidate>
+                        <div class="field" id="usernameField">
                             <label for="username">Tên đăng nhập</label>
                             <input type="text" id="username" name="username" required 
-                                   value="${param.username}" />
+                                   value="${param.username}" 
+                                   minlength="3" maxlength="50"
+                                   pattern="^[a-zA-Z0-9_]+$"
+                                   autocomplete="username"
+                                   placeholder="Nhập tên đăng nhập" />
+                            <div class="error-message" id="usernameError">Tên đăng nhập phải có ít nhất 3 ký tự</div>
                         </div>
-                        <div class="field">
+                        <div class="field" id="passwordField">
                             <label for="password">Mật khẩu</label>
-                            <input type="password" id="password" name="password" required />
+                            <input type="password" id="password" name="password" required 
+                                   minlength="6"
+                                   autocomplete="new-password"
+                                   placeholder="Nhập mật khẩu" />
+                            <div class="password-strength">
+                                <div class="password-strength-bar" id="strengthBar"></div>
+                            </div>
                             <div class="password-hint">Mật khẩu phải có ít nhất 6 ký tự</div>
+                            <div class="error-message" id="passwordError">Mật khẩu phải có ít nhất 6 ký tự</div>
                         </div>
-                        <div class="field">
+                        <div class="field" id="confirmPasswordField">
                             <label for="confirmPassword">Xác nhận mật khẩu</label>
-                            <input type="password" id="confirmPassword" name="confirmPassword" required />
+                            <input type="password" id="confirmPassword" name="confirmPassword" required 
+                                   autocomplete="new-password"
+                                   placeholder="Nhập lại mật khẩu" />
+                            <div class="error-message" id="confirmPasswordError">Mật khẩu xác nhận không khớp</div>
                         </div>
-                        <button class="btn" type="submit">Đăng ký</button>
+                        <button class="btn" type="submit" id="submitBtn">Đăng ký</button>
                     </form>
                     <div class="helper">
                         Đã có tài khoản? <a href="${pageContext.request.contextPath}/login">Đăng nhập ngay</a>
@@ -200,8 +244,162 @@
                     if (el) el.textContent = data.count;
                 }).catch(() => {});
         }
+        
+        function validateUsername() {
+            const username = document.getElementById('username');
+            const field = document.getElementById('usernameField');
+            const error = document.getElementById('usernameError');
+            const value = username.value.trim();
+            
+            if (!value) {
+                username.classList.add('error');
+                username.classList.remove('valid');
+                field.classList.add('error');
+                error.textContent = 'Tên đăng nhập không được để trống';
+                return false;
+            }
+            
+            if (value.length < 3) {
+                username.classList.add('error');
+                username.classList.remove('valid');
+                field.classList.add('error');
+                error.textContent = 'Tên đăng nhập phải có ít nhất 3 ký tự';
+                return false;
+            }
+            
+            if (value.length > 50) {
+                username.classList.add('error');
+                username.classList.remove('valid');
+                field.classList.add('error');
+                error.textContent = 'Tên đăng nhập không được vượt quá 50 ký tự';
+                return false;
+            }
+            
+            if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+                username.classList.add('error');
+                username.classList.remove('valid');
+                field.classList.add('error');
+                error.textContent = 'Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới';
+                return false;
+            }
+            
+            username.classList.remove('error');
+            username.classList.add('valid');
+            field.classList.remove('error');
+            return true;
+        }
+        
+        function validatePassword() {
+            const password = document.getElementById('password');
+            const field = document.getElementById('passwordField');
+            const error = document.getElementById('passwordError');
+            const value = password.value;
+            const strengthBar = document.getElementById('strengthBar');
+            
+            if (!value) {
+                password.classList.add('error');
+                password.classList.remove('valid');
+                field.classList.add('error');
+                error.textContent = 'Mật khẩu không được để trống';
+                strengthBar.className = 'password-strength-bar';
+                return false;
+            }
+            
+            if (value.length < 6) {
+                password.classList.add('error');
+                password.classList.remove('valid');
+                field.classList.add('error');
+                error.textContent = 'Mật khẩu phải có ít nhất 6 ký tự';
+                strengthBar.className = 'password-strength-bar weak';
+                return false;
+            }
+            
+            strengthBar.className = 'password-strength-bar';
+            if (value.length >= 6 && value.length < 10) {
+                strengthBar.classList.add('weak');
+            } else if (value.length >= 10 && /[A-Z]/.test(value) && /[0-9]/.test(value)) {
+                strengthBar.classList.add('strong');
+            } else {
+                strengthBar.classList.add('medium');
+            }
+            
+            password.classList.remove('error');
+            password.classList.add('valid');
+            field.classList.remove('error');
+            return true;
+        }
+        
+        function validateConfirmPassword() {
+            const confirmPassword = document.getElementById('confirmPassword');
+            const field = document.getElementById('confirmPasswordField');
+            const error = document.getElementById('confirmPasswordError');
+            const password = document.getElementById('password').value;
+            const value = confirmPassword.value;
+            
+            if (!value) {
+                confirmPassword.classList.add('error');
+                confirmPassword.classList.remove('valid');
+                field.classList.add('error');
+                error.textContent = 'Vui lòng xác nhận mật khẩu';
+                return false;
+            }
+            
+            if (value !== password) {
+                confirmPassword.classList.add('error');
+                confirmPassword.classList.remove('valid');
+                field.classList.add('error');
+                error.textContent = 'Mật khẩu xác nhận không khớp';
+                return false;
+            }
+            
+            confirmPassword.classList.remove('error');
+            confirmPassword.classList.add('valid');
+            field.classList.remove('error');
+            return true;
+        }
+        
+        function validateRegisterForm() {
+            const isUsernameValid = validateUsername();
+            const isPasswordValid = validatePassword();
+            const isConfirmValid = validateConfirmPassword();
+            return isUsernameValid && isPasswordValid && isConfirmValid;
+        }
+        
+        document.getElementById('username').addEventListener('blur', validateUsername);
+        document.getElementById('username').addEventListener('input', function() {
+            if (this.classList.contains('error')) {
+                validateUsername();
+            }
+        });
+        
+        document.getElementById('password').addEventListener('blur', validatePassword);
+        document.getElementById('password').addEventListener('input', function() {
+            if (this.classList.contains('error')) {
+                validatePassword();
+            }
+            const confirmPassword = document.getElementById('confirmPassword');
+            if (confirmPassword.value) {
+                validateConfirmPassword();
+            }
+        });
+        
+        document.getElementById('confirmPassword').addEventListener('blur', validateConfirmPassword);
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            if (this.classList.contains('error')) {
+                validateConfirmPassword();
+            }
+        });
+        
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            if (!validateRegisterForm()) {
+                e.preventDefault();
+                const firstError = document.querySelector('input.error');
+                if (firstError) {
+                    firstError.focus();
+                }
+            }
+        });
 
-        // init
         refreshCartCount();
     </script>
 </body>

@@ -156,7 +156,7 @@
                 <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng(<span id="cartCount">0</span>)</a>
                 <c:choose>
                     <c:when test="${not empty sessionScope.user}">
-                        <c:if test="${sessionScope.user.role.name == 'ADMIN'}">
+                        <c:if test="${sessionScope.user.roleName == 'ADMIN'}">
                             <a href="${pageContext.request.contextPath}/admin/products" style="color:#0071e3;">Trang
                                 Quản Lý</a>
                         </c:if>
@@ -178,7 +178,6 @@
         <h1>Danh sách sản phẩm</h1>
     </div>
 
-    <!-- Search Form -->
     <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 12px;">
         <form method="GET" action="${pageContext.request.contextPath}/products" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
             <div style="flex: 1; min-width: 200px;">
@@ -190,8 +189,8 @@
                 <select name="category" style="width: 100%; padding: 0.75rem; border: 1px solid #e5e5ea; border-radius: 8px; font-size: 0.95rem;">
                     <option value="">Tất cả danh mục</option>
                     <c:forEach var="category" items="${categories}">
-                        <option value="${category.id}" ${selectedCategory == category.id ? 'selected' : ''}>
-                            ${category.name}
+                        <option value="${category.categoryId}" ${selectedCategory == category.categoryId ? 'selected' : ''}>
+                            ${category.categoryName}
                         </option>
                     </c:forEach>
                 </select>
@@ -203,7 +202,6 @@
         </form>
     </div>
 
-    <!-- Search Results Info -->
     <c:if test="${not empty searchKeyword or not empty selectedCategory}">
         <div style="margin-bottom: 1rem; color: #666; font-size: 0.9rem;">
             <c:if test="${not empty searchKeyword}">
@@ -213,7 +211,7 @@
             <c:if test="${not empty selectedCategory}">
                 Danh mục: <strong>
                     <c:forEach var="category" items="${categories}">
-                        <c:if test="${category.id == selectedCategory}">${category.name}</c:if>
+                        <c:if test="${category.categoryId == selectedCategory}">${category.categoryName}</c:if>
                     </c:forEach>
                 </strong>
             </c:if>
@@ -224,7 +222,7 @@
     <div class="grid">
         <c:forEach var="product" items="${products}">
             <div class="card">
-                <a href="${pageContext.request.contextPath}/products/view?id=${product.id}"
+                <a href="${pageContext.request.contextPath}/products/view?id=${product.productId}"
                    style="text-decoration:none; color:inherit;">
                     <c:choose>
                         <c:when test="${not empty product.image}">
@@ -247,7 +245,7 @@
                         </c:choose>
                     </div>
                     <div style="margin-top:8px;">
-                        <button class="btn add-to-cart-btn" data-id="${product.id}"
+                        <button class="btn add-to-cart-btn" data-id="${product.productId}"
                                 data-stock="${product.quantityInStock}">Thêm vào giỏ
                         </button>
                     </div>
@@ -333,7 +331,6 @@
                     if (elh) elh.textContent = json.count;
                     showToast('Đã thêm vào giỏ hàng');
                 } else {
-                    // fallback: refresh count
                     refreshCartCount();
                     showToast('Đã thêm vào giỏ hàng');
                 }
@@ -366,7 +363,6 @@
         }, 2000);
     }
 
-    // init
     refreshCartCount();
 </script>
 </body>

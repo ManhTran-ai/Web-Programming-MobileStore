@@ -26,7 +26,6 @@
             min-height: 100vh;
         }
 
-        /* Sidebar */
         .sidebar {
             width: 260px;
             background: #1a1a1a;
@@ -87,7 +86,6 @@
             font-size: 1.1rem;
         }
 
-        /* Main Content */
         .main-content {
             flex: 1;
             margin-left: 260px;
@@ -167,7 +165,6 @@
             font-size: 0.875rem;
         }
 
-        /* Search Box */
         .search-box {
             position: relative;
         }
@@ -195,7 +192,6 @@
             font-size: 1rem;
         }
 
-        /* Alert Messages */
         .alert {
             padding: 1rem 1.5rem;
             border-radius: 8px;
@@ -238,7 +234,6 @@
             opacity: 1;
         }
 
-        /* Stats Cards */
         .stats-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -281,7 +276,6 @@
             color: #ff3b30;
         }
 
-        /* Table */
         .table-container {
             background: #ffffff;
             border-radius: 12px;
@@ -440,7 +434,6 @@
             margin-bottom: 1.5rem;
         }
 
-        /* Pagination */
         .table-footer {
             padding: 1rem 1.5rem;
             border-top: 1px solid #e5e5ea;
@@ -454,7 +447,6 @@
             color: #888;
         }
 
-        /* Delete Confirmation Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -529,12 +521,10 @@
             min-width: 120px;
         }
 
-        /* Format số */
         .format-number {
             font-variant-numeric: tabular-nums;
         }
 
-        /* Responsive */
         @media (max-width: 1200px) {
             .stats-row {
                 grid-template-columns: repeat(2, 1fr);
@@ -577,7 +567,6 @@
 </head>
 <body>
     <div class="admin-container">
-        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Mobile Store</h2>
@@ -595,7 +584,6 @@
                             Sản phẩm
                         </a>
                     </li>
-                    <!-- Categories menu removed -->
                     <li>
                         <a href="${pageContext.request.contextPath}/admin/orders">
                             Đơn hàng
@@ -605,7 +593,6 @@
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
             <div class="page-header">
                 <h1>Quản lý Sản phẩm</h1>
@@ -619,7 +606,6 @@
                 </div>
             </div>
 
-            <!-- Alert Messages -->
             <c:if test="${param.success == 'created'}">
                 <div class="alert alert-success" id="alertSuccess">
                     <span>✓</span> Thêm sản phẩm thành công!
@@ -657,7 +643,6 @@
                 </div>
             </c:if>
 
-            <!-- Stats Cards -->
             <div class="stats-row">
                 <div class="stat-card primary">
                     <div class="label">Tổng sản phẩm</div>
@@ -677,7 +662,6 @@
                 </div>
             </div>
 
-            <!-- Product Table -->
             <div class="table-container">
                 <div class="table-header">
                     <h3>Danh sách sản phẩm</h3>
@@ -710,10 +694,10 @@
                             </thead>
                             <tbody>
                                 <c:forEach var="product" items="${products}">
-                                    <tr data-product-id="${product.id}"
+                                    <tr data-product-id="${product.productId}"
                                         data-product-name="${product.productName}"
                                         data-quantity="${product.quantityInStock}">
-                                        <td>${product.id}</td>
+                                        <td>${product.productId}</td>
                                         <td>
                                             <c:choose>
                                                 <c:when test="${not empty product.image}">
@@ -731,7 +715,7 @@
                                             <div class="product-name" title="${product.productName}">${product.productName}</div>
                                             <div class="product-manufacturer">${product.manufacturer}</div>
                                         </td>
-                                        <td>${product.category.name}</td>
+                                        <td>${product.category.categoryName}</td>
                                         <td class="price format-number">
                                             <fmt:formatNumber value="${product.price}" type="number" groupingUsed="true"/>₫
                                         </td>
@@ -754,14 +738,14 @@
                                             </span>
                                         </td>
                                         <td class="actions">
-                                            <a href="${pageContext.request.contextPath}/admin/products/edit?id=${product.id}"
+                                            <a href="${pageContext.request.contextPath}/admin/products/edit?id=${product.productId}"
                                                class="btn btn-secondary btn-sm"
                                                title="Sửa sản phẩm">
                                                 ✏️ Sửa
                                             </a>
                                             <button type="button"
                                                     class="btn btn-danger btn-sm delete-btn"
-                                                    data-id="${product.id}"
+                                                    data-id="${product.productId}"
                                                     data-name="${product.productName}"
                                                     title="Xóa sản phẩm">
                                                 🗑️ Xóa
@@ -780,7 +764,6 @@
         </main>
     </div>
 
-    <!-- Delete Confirmation Modal -->
     <div class="modal-overlay" id="deleteModal">
         <div class="modal">
             <div class="modal-icon warning">⚠️</div>
@@ -798,7 +781,6 @@
     </div>
 
     <script>
-        // ==================== DOM Elements ====================
         const searchInput = document.getElementById('searchInput');
         const productsTable = document.getElementById('productsTable');
         const deleteModal = document.getElementById('deleteModal');
@@ -806,7 +788,6 @@
         const modalProductName = document.getElementById('modalProductName');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
 
-        // ==================== Calculate Stats ====================
         function calculateStats() {
             const rows = document.querySelectorAll('#productsTable tbody tr');
             let inStock = 0, lowStock = 0, outOfStock = 0;
@@ -827,7 +808,6 @@
             document.getElementById('outOfStockCount').textContent = outOfStock;
         }
 
-        // ==================== Search Functionality ====================
         if (searchInput && productsTable) {
             searchInput.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase().trim();
@@ -850,7 +830,6 @@
             });
         }
 
-        // ==================== Delete Modal ====================
         document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const productId = this.dataset.id;
@@ -872,14 +851,12 @@
             }
         });
 
-        // Close modal on Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && deleteModal.classList.contains('active')) {
                 deleteModal.classList.remove('active');
             }
         });
 
-        // ==================== Auto-hide alerts ====================
         setTimeout(function() {
             const alerts = document.querySelectorAll('.alert-success');
             alerts.forEach(alert => {
@@ -889,7 +866,6 @@
             });
         }, 5000);
 
-        // ==================== Initialize ====================
         calculateStats();
     </script>
 </body>

@@ -82,7 +82,7 @@ public class CartServlet extends HttpServlet {
                     boolean found = false;
                     int currentQty = 0;
                     for (CartItem item : cart) {
-                        if (item.getProduct().getId().equals(product.getId())) {
+                        if (item.getProduct().getProductId().equals(product.getProductId())) {
                             currentQty = item.getQuantity();
                             found = true;
                             break;
@@ -111,7 +111,7 @@ public class CartServlet extends HttpServlet {
 
                     if (found) {
                         for (CartItem item : cart) {
-                            if (item.getProduct().getId().equals(product.getId())) {
+                            if (item.getProduct().getProductId().equals(product.getProductId())) {
                                 item.setQuantity(newQuantity);
                                 break;
                             }
@@ -120,7 +120,7 @@ public class CartServlet extends HttpServlet {
                         cart.add(new CartItem(product, newQuantity));
                     }
 
-                    cartDAO.upsertCartItem(user.getId(), product.getId(), newQuantity);
+                    cartDAO.upsertCartItem(user.getId(), product.getProductId(), newQuantity);
 
                     int totalQty = 0;
                     for (CartItem it : cart) totalQty += it.getQuantity();
@@ -149,6 +149,8 @@ public class CartServlet extends HttpServlet {
             }
         } else if ("remove".equals(action)) {
             String idxStr = request.getParameter("index");
+            String xreq = request.getHeader("X-Requested-With");
+            boolean isAjax = xreq != null && "XMLHttpRequest".equalsIgnoreCase(xreq);
             try {
                 int idx = Integer.parseInt(idxStr);
                 List<CartItem> cart = null;
@@ -157,46 +159,140 @@ public class CartServlet extends HttpServlet {
                     cart = (List<CartItem>) cartObj3;
                 }
                 if (cart != null && idx >=0 && idx < cart.size()) {
-                    int productId = cart.get(idx).getProduct().getId();
+                    int productId = cart.get(idx).getProduct().getProductId();
                     cart.remove(idx);
                     cartDAO.deleteCartItem(user.getId(), productId);
+                    
+                    // Tính lại tổng
+                    double cartTotal = 0;
+                    int itemTotal = 0;
+                    for (CartItem item : cart) {
+                        cartTotal += item.getProduct().getPrice() * item.getQuantity();
+                    }
+                    
+                    if (isAjax) {
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.getWriter().print("{\"success\":true,\"cartTotal\":" + cartTotal + ",\"itemCount\":" + cart.size() + "}");
+                        return;
+                    }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                if (isAjax) {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().print("{\"success\":false,\"message\":\"" + e.getMessage() + "\"}");
+                    return;
+                }
+            }
             response.sendRedirect(request.getContextPath() + "/cart");
             return;
         } else if ("update".equals(action)) {
             String idxStr = request.getParameter("index");
             String qtyStr = request.getParameter("quantity");
+            String xreq = request.getHeader("X-Requested-With");
+            boolean isAjax = xreq != null && "XMLHttpRequest".equalsIgnoreCase(xreq);
+
+            if (idxStr == null || qtyStr == null) {
+                if (isAjax) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().print("{\"success\":false,\"message\":\"Thiếu thông tin cập nhật\"}");
+                    return;
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/cart?error=Thiếu thông tin cập nhật");
+                    return;
+                }
+            }
+
             try {
                 int idx = Integer.parseInt(idxStr);
                 int qty = Math.max(1, Integer.parseInt(qtyStr));
+
                 List<CartItem> cart = null;
                 Object cartObj4 = request.getSession().getAttribute("cart");
                 if (cartObj4 instanceof List) {
                     cart = (List<CartItem>) cartObj4;
                 }
-                if (cart != null && idx >=0 && idx < cart.size()) {
-                    int productId = cart.get(idx).getProduct().getId();
-                    Product fresh = productDAO.findById(productId);
-                    if (fresh != null && fresh.getQuantityInStock() < qty) {
-                        String msg;
-                        if (fresh.getQuantityInStock() <= 0) msg = "Sản phẩm đã hết hàng";
-                        else msg = "Chỉ còn " + fresh.getQuantityInStock() + " sản phẩm trong kho";
-                        String xreq = request.getHeader("X-Requested-With");
-                        if (xreq != null && "XMLHttpRequest".equalsIgnoreCase(xreq)) {
-                            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                            response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().print("{\"success\":false,\"message\":\"" + msg + "\"}");
-                            return;
-                        } else {
-                            response.sendRedirect(request.getContextPath() + "/cart?error=" + java.net.URLEncoder.encode(msg, "UTF-8"));
-                            return;
-                        }
+
+                if (cart == null || cart.isEmpty()) {
+                    cart = cartDAO.findByUserId(user.getId());
+                    if (cart != null && !cart.isEmpty()) {
+                        request.getSession().setAttribute("cart", cart);
                     }
-                    cart.get(idx).setQuantity(qty);
-                    cartDAO.upsertCartItem(user.getId(), productId, qty);
                 }
-            } catch (Exception ignored) {}
+
+                if (cart == null || cart.isEmpty()) {
+                    if (isAjax) {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.getWriter().print("{\"success\":false,\"message\":\"Giỏ hàng trống\"}");
+                        return;
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/cart?error=Giỏ hàng trống");
+                        return;
+                    }
+                }
+
+                if (idx < 0 || idx >= cart.size()) {
+                    if (isAjax) {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.getWriter().print("{\"success\":false,\"message\":\"Sản phẩm không tồn tại trong giỏ hàng\"}");
+                        return;
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/cart?error=Sản phẩm không tồn tại");
+                        return;
+                    }
+                }
+
+                int productId = cart.get(idx).getProduct().getProductId();
+                Product fresh = productDAO.findById(productId);
+                if (fresh != null && fresh.getQuantityInStock() < qty) {
+                    String msg;
+                    if (fresh.getQuantityInStock() <= 0) msg = "Sản phẩm đã hết hàng";
+                    else msg = "Chỉ còn " + fresh.getQuantityInStock() + " sản phẩm trong kho";
+                    if (isAjax) {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.getWriter().print("{\"success\":false,\"message\":\"" + msg + "\",\"maxStock\":" + fresh.getQuantityInStock() + "}");
+                        return;
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/cart?error=" + java.net.URLEncoder.encode(msg, "UTF-8"));
+                        return;
+                    }
+                }
+                cart.get(idx).setQuantity(qty);
+                cartDAO.upsertCartItem(user.getId(), productId, qty);
+
+                request.getSession().setAttribute("cart", cart);
+
+                double cartTotal = 0;
+                double itemTotal = cart.get(idx).getProduct().getPrice() * qty;
+                for (CartItem item : cart) {
+                    cartTotal += item.getProduct().getPrice() * item.getQuantity();
+                }
+
+                if (isAjax) {
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().print("{\"success\":true,\"itemTotal\":" + itemTotal + ",\"cartTotal\":" + cartTotal + "}");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                if (isAjax) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().print("{\"success\":false,\"message\":\"Dữ liệu không hợp lệ\"}");
+                    return;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                if (isAjax) {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().print("{\"success\":false,\"message\":\"Lỗi server: " + e.getMessage() + "\"}");
+                    return;
+                }
+            }
             response.sendRedirect(request.getContextPath() + "/cart");
             return;
         }

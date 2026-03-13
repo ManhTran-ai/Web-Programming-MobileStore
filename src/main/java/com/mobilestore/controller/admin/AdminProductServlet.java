@@ -157,13 +157,13 @@ public class AdminProductServlet extends HttpServlet {
             product.setImage(uploadResult.getFilePath());
 
             Category category = new Category();
-            category.setId(formData.getCategoryId());
+            category.setCategoryId(formData.getCategoryId());
             product.setCategory(category);
 
             Product existing = productDAO.findByUniqueKey(product.getProductName(),
                     product.getManufacturer(),
                     product.getProductCondition(),
-                    product.getCategory() != null ? product.getCategory().getId() : null);
+                    product.getCategory() != null ? product.getCategory().getCategoryId() : null);
 
             if (existing != null) {
                 int newQty = existing.getQuantityInStock() + product.getQuantityInStock();
@@ -245,7 +245,7 @@ public class AdminProductServlet extends HttpServlet {
             existingProduct.setImage(imagePath);
 
             Category category = new Category();
-            category.setId(formData.getCategoryId());
+            category.setCategoryId(formData.getCategoryId());
             existingProduct.setCategory(category);
 
             boolean updated = productDAO.update(existingProduct);
@@ -448,7 +448,7 @@ public class AdminProductServlet extends HttpServlet {
             formData.addError("Giá không được để trống");
         } else {
             try {
-                float price = Float.parseFloat(priceStr.trim());
+                Long price = Long.parseLong(priceStr.trim());
                 if (price < 0) {
                     formData.addError("Giá phải lớn hơn hoặc bằng 0");
                 } else if (price > 999999999) {
@@ -488,15 +488,15 @@ public class AdminProductServlet extends HttpServlet {
             } else {
                 Category existing = categoryDAO.findByName(name);
                 if (existing != null) {
-                    formData.setCategoryId(existing.getId());
+                    formData.setCategoryId(existing.getCategoryId());
                 } else {
                     Category toCreate = new Category();
-                    toCreate.setName(name);
+                    toCreate.setCategoryName(name);
                     Category created = categoryDAO.create(toCreate);
                     if (created == null) {
                         formData.addError("Không thể tạo danh mục mới. Vui lòng thử lại.");
                     } else {
-                        formData.setCategoryId(created.getId());
+                        formData.setCategoryId(created.getCategoryId());
                     }
                 }
             }
@@ -568,7 +568,7 @@ public class AdminProductServlet extends HttpServlet {
         request.setAttribute("error", String.join("<br>", errors));
 
         Product product = new Product();
-        product.setId(id);
+        product.setProductId(id);
         product.setProductName(formData.getProductName());
         product.setManufacturer(formData.getManufacturer());
         product.setProductCondition(formData.getProductCondition());
@@ -578,7 +578,7 @@ public class AdminProductServlet extends HttpServlet {
 
         if (formData.getCategoryId() != null) {
             Category category = new Category();
-            category.setId(formData.getCategoryId());
+            category.setCategoryId(formData.getCategoryId());
             product.setCategory(category);
         }
 

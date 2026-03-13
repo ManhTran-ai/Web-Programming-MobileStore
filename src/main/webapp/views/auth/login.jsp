@@ -6,7 +6,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập</title>
-    <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -67,6 +66,22 @@
         input:focus { 
             outline: none; 
             border-color: #1a1a1a; 
+        }
+        input.error {
+            border-color: #dc3545;
+            background-color: #fff5f5;
+        }
+        input.valid {
+            border-color: #28a745;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: none;
+        }
+        .field.error .error-message {
+            display: block;
         }
         .btn { 
             display: block; 
@@ -162,7 +177,6 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
 <header class="header">
     <div class="container">
         <div class="header-content">
@@ -173,7 +187,7 @@
                 <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng(<span id="cartCount">0</span>)</a>
                 <c:choose>
                     <c:when test="${not empty sessionScope.user}">
-                        <c:if test="${sessionScope.user.role.name == 'ADMIN'}">
+                        <c:if test="${sessionScope.user.roleName == 'ADMIN'}">
                             <a href="${pageContext.request.contextPath}/admin/products" style="color:#0071e3;">Trang
                                 Quản Lý</a>
                         </c:if>
@@ -190,7 +204,6 @@
     </div>
 </header>
 
-    <!-- Page Content -->
     <section class="page">
         <div class="container">
             <div class="center">
@@ -202,21 +215,29 @@
                     <c:if test="${not empty success}">
                         <div class="success">${success}</div>
                     </c:if>
-                    <form method="post" action="${pageContext.request.contextPath}/login" id="passwordForm">
-                        <div class="field">
+                    <form method="post" action="${pageContext.request.contextPath}/login" id="passwordForm" novalidate>
+                        <div class="field" id="usernameField">
                             <label for="username">Tên đăng nhập</label>
-                            <input type="text" id="username" name="username" required />
+                            <input type="text" id="username" name="username" 
+                                   required minlength="3" maxlength="50"
+                                   pattern="^[a-zA-Z0-9_]+$"
+                                   autocomplete="username"
+                                   placeholder="Nhập tên đăng nhập" />
+                            <div class="error-message" id="usernameError">Tên đăng nhập phải có ít nhất 3 ký tự</div>
                         </div>
-                        <div class="field">
+                        <div class="field" id="passwordField">
                             <label for="password">Mật khẩu</label>
-                            <input type="password" id="password" name="password" required />
+                            <input type="password" id="password" name="password" 
+                                   required minlength="6"
+                                   autocomplete="current-password"
+                                   placeholder="Nhập mật khẩu" />
+                            <div class="error-message" id="passwordError">Mật khẩu phải có ít nhất 6 ký tự</div>
                         </div>
-                        <button class="btn" type="submit">Đăng nhập</button>
+                        <button class="btn" type="submit" id="submitBtn">Đăng nhập</button>
                     </form>
                     
                     <div class="divider"><span>hoặc</span></div>
                     
-                    <!-- Google Sign-In Button -->
                     <button type="button" class="btn-google" onclick="loginWithGoogle()">
                         <img src="https://www.google.com/favicon.ico" alt="Google" />
                         Đăng nhập bằng Google
@@ -232,8 +253,101 @@
         </div>
     </section>
     <script>
-        // Google Client ID từ Google Cloud Console
         const GOOGLE_CLIENT_ID = "744565146565-ncqm19qq1eq9d0cq7l0q9k4ig88bnel5.apps.googleusercontent.com";
+        
+        function validateUsername() {
+            const username = document.getElementById('username');
+            const field = document.getElementById('usernameField');
+            const error = document.getElementById('usernameError');
+            const value = username.value.trim();
+            
+            if (!value) {
+                username.classList.add('error');
+                username.classList.remove('valid');
+                field.classList.add('error');
+                error.textContent = 'Tên đăng nhập không được để trống';
+                return false;
+            }
+            
+            if (value.length < 3) {
+                username.classList.add('error');
+                username.classList.remove('valid');
+                field.classList.add('error');
+                error.textContent = 'Tên đăng nhập phải có ít nhất 3 ký tự';
+                return false;
+            }
+            
+            if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+                username.classList.add('error');
+                username.classList.remove('valid');
+                field.classList.add('error');
+                error.textContent = 'Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới';
+                return false;
+            }
+            
+            username.classList.remove('error');
+            username.classList.add('valid');
+            field.classList.remove('error');
+            return true;
+        }
+        
+        function validatePassword() {
+            const password = document.getElementById('password');
+            const field = document.getElementById('passwordField');
+            const error = document.getElementById('passwordError');
+            const value = password.value;
+            
+            if (!value) {
+                password.classList.add('error');
+                password.classList.remove('valid');
+                field.classList.add('error');
+                error.textContent = 'Mật khẩu không được để trống';
+                return false;
+            }
+            
+            if (value.length < 6) {
+                password.classList.add('error');
+                password.classList.remove('valid');
+                field.classList.add('error');
+                error.textContent = 'Mật khẩu phải có ít nhất 6 ký tự';
+                return false;
+            }
+            
+            password.classList.remove('error');
+            password.classList.add('valid');
+            field.classList.remove('error');
+            return true;
+        }
+        
+        function validateLoginForm() {
+            const isUsernameValid = validateUsername();
+            const isPasswordValid = validatePassword();
+            return isUsernameValid && isPasswordValid;
+        }
+        
+        document.getElementById('username').addEventListener('blur', validateUsername);
+        document.getElementById('username').addEventListener('input', function() {
+            if (this.classList.contains('error')) {
+                validateUsername();
+            }
+        });
+        
+        document.getElementById('password').addEventListener('blur', validatePassword);
+        document.getElementById('password').addEventListener('input', function() {
+            if (this.classList.contains('error')) {
+                validatePassword();
+            }
+        });
+        
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            if (!validateLoginForm()) {
+                e.preventDefault();
+                const firstError = document.querySelector('input.error');
+                if (firstError) {
+                    firstError.focus();
+                }
+            }
+        });
         
         function loginWithGoogle() {
             google.accounts.id.initialize({
@@ -243,14 +357,11 @@
                 cancel_on_tap_outside: false
             });
             
-            // Hiển thị popup đăng nhập Google
             google.accounts.id.prompt();
         }
         
         function handleCredentialResponse(response) {
-            // response.credential chứa JWT ID token
             if (response.credential) {
-                // Tạo form ẩn để submit ID token về server
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '${pageContext.request.contextPath}/login';
@@ -275,7 +386,6 @@
                 }).catch(() => {});
         }
 
-        // init
         refreshCartCount();
     </script>
 </body>

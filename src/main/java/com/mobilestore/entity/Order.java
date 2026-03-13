@@ -9,19 +9,23 @@ import lombok.EqualsAndHashCode;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Order entity - POJO class không sử dụng JPA annotations
- */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
 public class Order {
-    private Integer id;
+    private Integer orderId;
     private String orderStatus;
     private Date orderDate;
     private Double totalAmount;
     private User user;
     private List<OrderDetail> details;
+    private String shippingAddress;
+    private String customerPhone;
+    private String note;
+    private String paymentMethod;
+    private String paymentStatus;
+    private String vnpTransactionId;
+    private String vnpOrderId;
 }

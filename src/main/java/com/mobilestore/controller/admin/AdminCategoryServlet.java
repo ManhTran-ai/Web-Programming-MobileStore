@@ -113,7 +113,7 @@ public class AdminCategoryServlet extends HttpServlet {
 		}
 
 		Category category = new Category();
-		category.setName(name.trim());
+		category.setCategoryName(name.trim());
 		Category created = categoryDAO.create(category);
 		if (created != null) {
 			response.sendRedirect(request.getContextPath() + "/admin/categories?success=created");
@@ -155,7 +155,7 @@ public class AdminCategoryServlet extends HttpServlet {
 			}
 
 			Category byName = categoryDAO.findByName(name.trim());
-			if (byName != null && !byName.getId().equals(id)) {
+			if (byName != null && !byName.getCategoryId().equals(id)) {
 				request.setAttribute("error", "Tên danh mục đã được sử dụng bởi danh mục khác");
 				request.setAttribute("isEdit", true);
 				request.setAttribute("category", existing);
@@ -163,7 +163,7 @@ public class AdminCategoryServlet extends HttpServlet {
 				return;
 			}
 
-			existing.setName(name.trim());
+			existing.setCategoryName(name.trim());
 			boolean updated = categoryDAO.update(existing);
 			if (updated) {
 				response.sendRedirect(request.getContextPath() + "/admin/categories?success=updated");

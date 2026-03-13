@@ -32,7 +32,7 @@ public class AdminAuthFilter implements Filter {
 
         User user = (User) session.getAttribute("user");
 
-        if (user.getRole() == null || !"ADMIN".equals(user.getRole().getName())) {
+        if (user.getRoleName() == null || !"ADMIN".equals(user.getRoleName())) {
             httpResponse.sendRedirect(httpRequest.getContextPath() + "/?error=access_denied");
             return;
         }

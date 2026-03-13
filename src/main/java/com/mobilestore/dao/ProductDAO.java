@@ -260,7 +260,7 @@ public class ProductDAO {
             ps.setString(1, product.getProductName());
             ps.setString(2, product.getManufacturer());
             ps.setString(3, product.getProductCondition());
-            ps.setFloat(4, product.getPrice());
+            ps.setLong(4, product.getPrice());
             String imageToStore = product.getImage();
             if (imageToStore != null && imageToStore.startsWith("/")) {
                 imageToStore = imageToStore.substring(1);
@@ -268,8 +268,8 @@ public class ProductDAO {
             ps.setString(5, imageToStore);
             ps.setString(6, product.getProductInfo());
             ps.setInt(7, product.getQuantityInStock());
-            if (product.getCategory() != null && product.getCategory().getId() != null) {
-                ps.setInt(8, product.getCategory().getId());
+            if (product.getCategory() != null && product.getCategory().getCategoryId() != null) {
+                ps.setInt(8, product.getCategory().getCategoryId());
             } else {
                 ps.setNull(8, java.sql.Types.INTEGER);
             }
@@ -279,7 +279,7 @@ public class ProductDAO {
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        product.setId(generatedKeys.getInt(1));
+                        product.setProductId(generatedKeys.getInt(1));
                         return product;
                     }
                 }
@@ -302,16 +302,16 @@ public class ProductDAO {
             ps.setString(1, product.getProductName());
             ps.setString(2, product.getManufacturer());
             ps.setString(3, product.getProductCondition());
-            ps.setFloat(4, product.getPrice());
+            ps.setLong(4, product.getPrice());
             ps.setString(5, product.getImage());
             ps.setString(6, product.getProductInfo());
             ps.setInt(7, product.getQuantityInStock());
-            if (product.getCategory() != null && product.getCategory().getId() != null) {
-                ps.setInt(8, product.getCategory().getId());
+            if (product.getCategory() != null && product.getCategory().getCategoryId() != null) {
+                ps.setInt(8, product.getCategory().getCategoryId());
             } else {
                 ps.setNull(8, java.sql.Types.INTEGER);
             }
-            ps.setInt(9, product.getId());
+            ps.setInt(9, product.getProductId());
             
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
@@ -373,11 +373,11 @@ public class ProductDAO {
     
     private Product mapResultSetToProduct(ResultSet rs) throws SQLException {
         Product product = new Product();
-        product.setId(rs.getInt("product_id"));
+        product.setProductId(rs.getInt("product_id"));
         product.setProductName(rs.getString("product_name"));
         product.setManufacturer(rs.getString("manufacturer"));
         product.setProductCondition(rs.getString("product_condition"));
-        product.setPrice(rs.getFloat("price"));
+        product.setPrice(rs.getLong("price"));
         String img = rs.getString("image");
         if (img != null) {
             if (img.startsWith("/")) {
@@ -391,8 +391,8 @@ public class ProductDAO {
         Integer categoryId = rs.getInt("category_id");
         if (categoryId != null && !rs.wasNull()) {
             Category category = new Category();
-            category.setId(categoryId);
-            category.setName(rs.getString("category_name"));
+            category.setCategoryId(categoryId);
+            category.setCategoryName(rs.getString("category_name"));
             product.setCategory(category);
         }
         

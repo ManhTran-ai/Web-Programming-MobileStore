@@ -13,8 +13,11 @@ public class User {
     private Integer id;
     private String username;
     private String password;
-    private Role role;
+    private String roleName;
     private String oauthProvider;
     private String oauthId;
     private String email;
+    private String shippingAddress;
+    private String customerPhone;
+    private String note;
 }

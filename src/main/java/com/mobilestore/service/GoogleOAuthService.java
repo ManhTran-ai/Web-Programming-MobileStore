@@ -1,21 +1,14 @@
 package com.mobilestore.service;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.auth0.jwt.interfaces.JWTVerifier;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mobilestore.entity.User;
-import com.mobilestore.entity.Role;
 import com.mobilestore.dao.UserDAO;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Collections;
 
 public class GoogleOAuthService {
     
@@ -46,17 +39,23 @@ public class GoogleOAuthService {
                 
                 if (user == null) {
                     user = new User();
-                    user.setUsername(name != null ? name : email.split("@")[0]);
+                    
+                    String baseUsername = (name != null && !name.isEmpty()) ? name : email.split("@")[0];
+                    String username = baseUsername;
+                    int counter = 1;
+                    
+                    while (userDAO.findByUsername(username) != null) {
+                        username = baseUsername + counter;
+                        counter++;
+                    }
+                    
+                    user.setUsername(username);
                     user.setPassword(null);
                     user.setOauthProvider("google");
                     user.setOauthId(googleId);
                     user.setEmail(email);
-                    
-                    Role role = new Role();
-                    role.setName("CUSTOMER");
-                    role.setDescription("customer role");
-                    user.setRole(role);
-                    
+                    user.setRoleName("CUSTOMER");
+
                     user = userDAO.createWithOAuth(user);
                 }
                 
