@@ -8,14 +8,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Data Access Object cho Product entity sử dụng JDBC
- */
 public class ProductDAO {
     
-    /**
-     * Tìm product theo ID
-     */
     public Product findById(Integer id) {
         String sql = "SELECT p.product_id, p.product_name, " +
                      "p.manufacturer, p.product_condition, " +
@@ -42,9 +36,6 @@ public class ProductDAO {
         return null;
     }
     
-    /**
-     * Lấy tất cả products
-     */
     public List<Product> findAll() {
         List<Product> products = new ArrayList<>();
         String sql = "SELECT p.product_id, p.product_name, " +
@@ -69,9 +60,6 @@ public class ProductDAO {
         return products;
     }
     
-    /**
-     * Tìm products theo category
-     */
     public List<Product> findByCategory(Integer categoryId) {
         List<Product> products = new ArrayList<>();
         String sql = "SELECT p.product_id, p.product_name, " +
@@ -100,9 +88,6 @@ public class ProductDAO {
         return products;
     }
     
-    /**
-     * Tìm products theo tên (search)
-     */
     public List<Product> searchByName(String keyword) {
         List<Product> products = new ArrayList<>();
         String sql = "SELECT p.product_id, p.product_name, " +
@@ -133,9 +118,6 @@ public class ProductDAO {
         return products;
     }
 
-    /**
-     * Đếm số lượng sản phẩm tìm kiếm được
-     */
     public int countSearch(String keyword, Integer categoryId) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS total FROM products p WHERE 1=1");
 
@@ -174,9 +156,6 @@ public class ProductDAO {
         return 0;
     }
 
-    /**
-     * Tìm kiếm sản phẩm với pagination và filter theo category
-     */
     public List<Product> searchWithFilter(String keyword, Integer categoryId, int offset, int limit) {
         List<Product> products = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT p.product_id, p.product_name, ")
@@ -227,9 +206,6 @@ public class ProductDAO {
         return products;
     }
     
-    /**
-     * Đếm tổng số sản phẩm
-     */
     public int countAll() {
         String sql = "SELECT COUNT(*) AS total FROM products";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -245,9 +221,6 @@ public class ProductDAO {
         return 0;
     }
 
-    /**
-     * Lấy trang sản phẩm (offset, limit) sắp xếp giảm dần theo product_id
-     */
     public List<Product> findPage(int offset, int limit) {
         List<Product> products = new ArrayList<>();
         String sql = "SELECT p.product_id, p.product_name, " +
@@ -276,9 +249,6 @@ public class ProductDAO {
         return products;
     }
     
-    /**
-     * Tạo product mới
-     */
     public Product create(Product product) {
         String sql = "INSERT INTO products (product_name, manufacturer, product_condition, price, " +
                      "image, product_info, quantity_in_stock, category_id) " +
@@ -291,7 +261,6 @@ public class ProductDAO {
             ps.setString(2, product.getManufacturer());
             ps.setString(3, product.getProductCondition());
             ps.setFloat(4, product.getPrice());
-            // Ensure stored image path does not contain leading context path or leading slash
             String imageToStore = product.getImage();
             if (imageToStore != null && imageToStore.startsWith("/")) {
                 imageToStore = imageToStore.substring(1);
@@ -299,7 +268,6 @@ public class ProductDAO {
             ps.setString(5, imageToStore);
             ps.setString(6, product.getProductInfo());
             ps.setInt(7, product.getQuantityInStock());
-            // Fix: Sử dụng setObject thay vì setInt để hỗ trợ null value
             if (product.getCategory() != null && product.getCategory().getId() != null) {
                 ps.setInt(8, product.getCategory().getId());
             } else {
@@ -323,9 +291,6 @@ public class ProductDAO {
         return null;
     }
     
-    /**
-     * Cập nhật product
-     */
     public boolean update(Product product) {
         String sql = "UPDATE products SET product_name = ?, manufacturer = ?, product_condition = ?, " +
                      "price = ?, image = ?, product_info = ?, quantity_in_stock = ?, category_id = ? " +
@@ -341,7 +306,6 @@ public class ProductDAO {
             ps.setString(5, product.getImage());
             ps.setString(6, product.getProductInfo());
             ps.setInt(7, product.getQuantityInStock());
-            // Fix: Sử dụng setNull thay vì setInt để hỗ trợ null value
             if (product.getCategory() != null && product.getCategory().getId() != null) {
                 ps.setInt(8, product.getCategory().getId());
             } else {
@@ -358,9 +322,6 @@ public class ProductDAO {
         }
     }
     
-    /**
-     * Xóa product
-     */
     public boolean delete(Integer id) {
         String sql = "DELETE FROM products WHERE product_id = ?";
         
@@ -377,10 +338,6 @@ public class ProductDAO {
         }
     }
 
-    /**
-     * Tìm product theo bộ khóa duy nhất (product_name, manufacturer, product_condition, category_id)
-     * Trả về product nếu tồn tại, null nếu không tồn tại
-     */
     public Product findByUniqueKey(String productName, String manufacturer, String productCondition, Integer categoryId) {
         StringBuilder sql = new StringBuilder("SELECT p.product_id, p.product_name, p.manufacturer, p.product_condition, ")
                 .append("p.price, p.image, p.product_info, p.quantity_in_stock, p.category_id, c.category_name ")
@@ -414,9 +371,6 @@ public class ProductDAO {
         return null;
     }
     
-    /**
-     * Map ResultSet thành Product object
-     */
     private Product mapResultSetToProduct(ResultSet rs) throws SQLException {
         Product product = new Product();
         product.setId(rs.getInt("product_id"));
@@ -426,7 +380,6 @@ public class ProductDAO {
         product.setPrice(rs.getFloat("price"));
         String img = rs.getString("image");
         if (img != null) {
-            // Normalize: remove leading slash if present so JSP path building stays consistent
             if (img.startsWith("/")) {
                 img = img.substring(1);
             }
@@ -435,7 +388,6 @@ public class ProductDAO {
         product.setProductInfo(rs.getString("product_info"));
         product.setQuantityInStock(rs.getInt("quantity_in_stock"));
         
-        // Tạo Category object nếu có category_id
         Integer categoryId = rs.getInt("category_id");
         if (categoryId != null && !rs.wasNull()) {
             Category category = new Category();
@@ -447,4 +399,3 @@ public class ProductDAO {
         return product;
     }
 }
-
