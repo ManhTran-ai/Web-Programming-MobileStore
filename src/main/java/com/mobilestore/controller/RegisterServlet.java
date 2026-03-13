@@ -26,7 +26,6 @@ public class RegisterServlet extends HttpServlet {
         String password = req.getParameter("password");
         String confirmPassword = req.getParameter("confirmPassword");
 
-        // Validation
         if (username == null || username.trim().isEmpty()) {
             req.setAttribute("error", "Tên đăng nhập không được để trống");
             req.getRequestDispatcher("/views/auth/register.jsp").forward(req, resp);
@@ -51,27 +50,22 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
-        // Kiểm tra username đã tồn tại chưa
         if (userDAO.findByUsername(username) != null) {
             req.setAttribute("error", "Tên đăng nhập đã tồn tại");
             req.getRequestDispatcher("/views/auth/register.jsp").forward(req, resp);
             return;
         }
 
-        // Tạo user mới
         User newUser = new User();
         newUser.setUsername(username.trim());
         
-        // Hash mật khẩu trước khi lưu
         String hashedPassword = PasswordUtil.hashPassword(password);
         newUser.setPassword(hashedPassword);
         
-        // Mặc định role là CUSTOMER cho user mới đăng ký
         Role customerRole = new Role();
         customerRole.setName("CUSTOMER");
         newUser.setRole(customerRole);
 
-        // Lưu vào database
         User createdUser = userDAO.create(newUser);
         
         if (createdUser != null) {
@@ -83,4 +77,3 @@ public class RegisterServlet extends HttpServlet {
         }
     }
 }
-

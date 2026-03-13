@@ -9,9 +9,6 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
-/**
- * Servlet xử lý đăng xuất
- */
 @WebServlet(name = "LogoutServlet", urlPatterns = "/logout")
 public class LogoutServlet extends HttpServlet {
 
@@ -21,13 +18,11 @@ public class LogoutServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Hủy session hiện tại
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
         }
 
-        // Redirect về trang chủ
         response.sendRedirect(request.getContextPath() + "/");
     }
 
@@ -37,4 +32,3 @@ public class LogoutServlet extends HttpServlet {
         doGet(request, response);
     }
 }
-

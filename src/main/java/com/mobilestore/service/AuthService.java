@@ -12,7 +12,6 @@ public class AuthService {
         if (user == null)
             return null;
 
-        // Sử dụng BCrypt để verify mật khẩu
         boolean matches = PasswordUtil.verifyPassword(passwordPlain, user.getPassword());
         return matches ? user : null;
     }

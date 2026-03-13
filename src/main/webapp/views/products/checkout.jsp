@@ -186,9 +186,10 @@
                                 <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/>₫
                             </span>
                         </div>
-                        <div style="display:flex; gap:12px; justify-content:flex-end;">
+                        <div style="display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap;">
                             <a class="btn" href="${pageContext.request.contextPath}/cart" style="background:#e5e5ea;color:#1a1a1a;">Quay lại giỏ hàng</a>
-                            <button class="btn" type="submit">Xác nhận đặt hàng</button>
+                            <button class="btn" type="submit">Thanh toán khi nhận hàng</button>
+                            <button class="btn" type="button" onclick="payWithVNPay()" style="background:#0066cc;">Thanh toán qua VNPay</button>
                         </div>
                     </div>
                 </form>
@@ -204,6 +205,15 @@
                     const el = document.getElementById('cartCount');
                     if (el) el.textContent = data.count;
                 }).catch(() => {});
+        }
+
+        function payWithVNPay() {
+            // Submit form đến VNPayServlet
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '${pageContext.request.contextPath}/vnpay-payment';
+            document.body.appendChild(form);
+            form.submit();
         }
 
         // init
