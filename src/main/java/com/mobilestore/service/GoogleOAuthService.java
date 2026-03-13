@@ -17,29 +17,17 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Collections;
 
-/**
- * Service xử lý đăng nhập bằng Google OAuth2
- */
 public class GoogleOAuthService {
     
-    // Google Client ID từ Google Cloud Console
     private static final String CLIENT_ID = "744565146565-ncqm19qq1eq9d0cq7l0q9k4ig88bnel5.apps.googleusercontent.com";
-    
-    // Google JWKS URI để lấy public keys
     private static final String GOOGLE_JWKS_URI = "https://www.googleapis.com/oauth2/v3/certs";
     
     private final UserDAO userDAO = new UserDAO();
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final Gson gson = new Gson();
     
-    /**
-     * Verify Google ID token và lấy thông tin user
-     * @param idTokenString ID token từ client
-     * @return User nếu thành công, null nếu thất bại
-     */
     public User verifyAndGetUser(String idTokenString) {
         try {
-            // Gọi Google để lấy thông tin user từ ID token
             String userInfo = getGoogleUserInfo(idTokenString);
             
             if (userInfo != null) {
@@ -54,14 +42,12 @@ public class GoogleOAuthService {
                     return null;
                 }
                 
-                // Tìm user theo google oauth_id
                 User user = userDAO.findByOauthId(googleId, "google");
                 
                 if (user == null) {
-                    // Tạo user mới nếu chưa tồn tại
                     user = new User();
                     user.setUsername(name != null ? name : email.split("@")[0]);
-                    user.setPassword(null); // OAuth users không cần password
+                    user.setPassword(null);
                     user.setOauthProvider("google");
                     user.setOauthId(googleId);
                     user.setEmail(email);
@@ -83,12 +69,8 @@ public class GoogleOAuthService {
         return null;
     }
     
-    /**
-     * Gọi Google UserInfo API để xác thực token và lấy thông tin user
-     */
     private String getGoogleUserInfo(String idToken) {
         try {
-            // Sử dụng Google UserInfo endpoint để xác thực token
             HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken))
                 .GET()

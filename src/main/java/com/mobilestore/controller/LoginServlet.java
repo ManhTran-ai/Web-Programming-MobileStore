@@ -25,7 +25,6 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String idToken = req.getParameter("id_token");
         
-        // Xử lý đăng nhập bằng Google
         if (idToken != null && !idToken.isEmpty()) {
             User user = googleOAuthService.verifyAndGetUser(idToken);
             if (user != null) {
@@ -40,7 +39,6 @@ public class LoginServlet extends HttpServlet {
             }
         }
         
-        // Xử lý đăng nhập bằng username/password (logic cũ)
         String username = req.getParameter("username");
         String password = req.getParameter("password");
 
@@ -55,4 +53,3 @@ public class LoginServlet extends HttpServlet {
         }
     }
 }
-
