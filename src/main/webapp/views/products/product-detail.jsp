@@ -358,7 +358,7 @@
                 <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng(<span id="cartCount">0</span>)</a>
                 <c:choose>
                     <c:when test="${not empty sessionScope.user}">
-                        <c:if test="${sessionScope.user.role.name == 'ADMIN'}">
+                        <c:if test="${sessionScope.user.roleName == 'ADMIN'}">
                             <a href="${pageContext.request.contextPath}/admin/products" style="color:#0071e3;">Trang
                                 Quản Lý</a>
                         </c:if>
@@ -411,7 +411,7 @@
 
             <div class="actions">
                 <button class="btn add-to-cart-btn"
-                        data-id="${product.id}"
+                        data-id="${product.productId}"
                         data-stock="${product.quantityInStock}"
                         ${product.quantityInStock == 0 ? 'disabled' : ''}>
                     <c:choose>
@@ -424,13 +424,12 @@
         </div>
     </div>
 
-    <!-- Sản phẩm liên quan -->
     <c:if test="${not empty relatedProducts}">
         <div class="related-products">
             <h2>Sản phẩm liên quan</h2>
             <div class="related-grid">
                 <c:forEach var="relatedProduct" items="${relatedProducts}">
-                    <a href="${pageContext.request.contextPath}/products/view?id=${relatedProduct.id}"
+                    <a href="${pageContext.request.contextPath}/products/view?id=${relatedProduct.productId}"
                        class="related-card">
                         <c:choose>
                             <c:when test="${not empty relatedProduct.image}">
@@ -511,7 +510,6 @@
                     if (elh) elh.textContent = json.count;
                     showToast('Đã thêm vào giỏ hàng');
                 } else {
-                    // fallback: refresh count
                     refreshCartCount();
                     showToast('Đã thêm vào giỏ hàng');
                 }
@@ -544,7 +542,6 @@
         }, 2000);
     }
 
-    // init
     refreshCartCount();
 </script>
 </body>

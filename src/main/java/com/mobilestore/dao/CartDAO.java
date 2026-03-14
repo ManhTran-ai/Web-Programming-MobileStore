@@ -1,6 +1,7 @@
 package com.mobilestore.dao;
 
 import com.mobilestore.entity.CartItem;
+import com.mobilestore.entity.Category;
 import com.mobilestore.entity.Product;
 import com.mobilestore.util.DatabaseConnection;
 
@@ -12,22 +13,34 @@ public class CartDAO {
 
     public List<CartItem> findByUserId(Integer userId) {
         List<CartItem> items = new ArrayList<>();
-        String sql = "SELECT c.quantity, p.product_id, p.product_name, p.manufacturer, p.product_condition, p.price, p.image, p.product_info, p.quantity_in_stock, p.category_id " +
-                "FROM cart c JOIN products p ON c.product_id = p.product_id WHERE c.user_id = ?";
+        String sql = "SELECT c.quantity, p.product_id, p.product_name, p.manufacturer, p.product_condition, p.price, p.image, p.product_info, p.quantity_in_stock, p.category_id, " +
+                "cat.category_id as cat_id, cat.category_name " +
+                "FROM cart c JOIN products p ON c.product_id = p.product_id " +
+                "LEFT JOIN categories cat ON p.category_id = cat.category_id " +
+                "WHERE c.user_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Product p = new Product();
-                    p.setId(rs.getInt("product_id"));
+                    p.setProductId(rs.getInt("product_id"));
                     p.setProductName(rs.getString("product_name"));
                     p.setManufacturer(rs.getString("manufacturer"));
                     p.setProductCondition(rs.getString("product_condition"));
-                    p.setPrice(rs.getFloat("price"));
+                    p.setPrice(rs.getLong("price"));
                     p.setImage(rs.getString("image"));
                     p.setProductInfo(rs.getString("product_info"));
                     p.setQuantityInStock(rs.getInt("quantity_in_stock"));
+
+                    // Set category if exists
+                    int catId = rs.getInt("cat_id");
+                    if (!rs.wasNull()) {
+                        Category category = new Category();
+                        category.setCategoryId(catId);
+                        category.setCategoryName(rs.getString("category_name"));
+                        p.setCategory(category);
+                    }
 
                     int qty = rs.getInt("quantity");
                     items.add(new CartItem(p, qty));

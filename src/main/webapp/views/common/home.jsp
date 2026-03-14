@@ -296,7 +296,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/home-categories.css">
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="container">
             <div class="header-content">
@@ -307,7 +306,7 @@
                     <a href="${pageContext.request.contextPath}/cart">Giỏ Hàng(<span id="cartCount">0</span>)</a>
                     <c:choose>
                         <c:when test="${not empty sessionScope.user}">
-                            <c:if test="${sessionScope.user.role.name == 'ADMIN'}">
+                            <c:if test="${sessionScope.user.roleName == 'ADMIN'}">
                                 <a href="${pageContext.request.contextPath}/admin/products" style="color: #0071e3;">Trang Quản Lý</a>
                             </c:if>
                             <span style="color: #888;">Xin chào, ${sessionScope.user.username}</span>
@@ -323,7 +322,6 @@
         </div>
     </header>
 
-    <!-- Flash Success Message -->
     <c:if test="${not empty sessionScope.flashSuccess}">
         <div class="flash-message">
             ${sessionScope.flashSuccess}
@@ -331,7 +329,6 @@
         <c:remove var="flashSuccess" scope="session"/>
     </c:if>
 
-    <!-- Hero Section with Carousel -->
     <section class="hero">
         <div class="hero-content">
             <div class="container">
@@ -359,7 +356,6 @@
     
     <script src="${pageContext.request.contextPath}/assets/js/slider.js"></script>
 
-    <!-- Categories Section -->
     <section class="categories">
         <div class="container">
             <h2 style="text-align:center; margin-bottom:1.25rem;">Khám Phá Sản Phẩm</h2>
@@ -422,7 +418,6 @@
         </div>
     </section>
 
-    <!-- Features Section -->
     <section class="features">
         <div class="container">
             <h2>Tại Sao Chọn Chúng Tôi?</h2>
@@ -451,14 +446,13 @@
         </div>
     </section>
     
-    <!-- Products Section -->
     <section class="products" style="padding: 3rem 0; background:#ffffff;">
         <div class="container">
-            <h2 style="text-align:center; margin-bottom:1.25rem;">Sản phẩm nổi bật</h2>
+            <h2 style="text-align:center; margin-bottom:1.25rem;">Sản phẩm mới</h2>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1.5rem;">
                 <c:forEach var="product" items="${products}">
                     <div style="border:1px solid #e5e5ea; border-radius:12px; padding:1rem; text-align:left; background:#fff;">
-                        <a href="${pageContext.request.contextPath}/products/view?id=${product.id}" style="text-decoration:none; color:inherit;">
+                        <a href="${pageContext.request.contextPath}/products/view?id=${product.productId}" style="text-decoration:none; color:inherit;">
                             <div style="height:160px; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:0.75rem;">
                                 <c:choose>
                                     <c:when test="${not empty product.image}">
@@ -480,7 +474,7 @@
                                     <c:otherwise>Tồn kho: ${product.quantityInStock}</c:otherwise>
                                 </c:choose>
                             </div>
-                            <button class="btn add-to-cart-btn" data-id="${product.id}"
+                            <button class="btn add-to-cart-btn" data-id="${product.productId}"
                                     data-stock="${product.quantityInStock}"
                                     style="width:100%; padding:0.5rem; font-size:0.9rem;">
                                 Thêm vào giỏ
@@ -490,7 +484,6 @@
                 </c:forEach>
             </div>
 
-            <!-- Pagination -->
             <c:if test="${totalPages > 1}">
                 <div style="display:flex; justify-content:center; gap:0.5rem; margin-top:1.5rem;">
                     <c:if test="${currentPage > 1}">
@@ -514,7 +507,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <p>&copy; 2024 Mobile Store. Tất cả quyền được bảo lưu.</p>
@@ -607,7 +599,6 @@
             }, 2000);
         }
 
-        // init
         refreshCartCount();
     </script>
 </body>

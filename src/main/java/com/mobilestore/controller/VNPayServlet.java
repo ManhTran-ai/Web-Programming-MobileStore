@@ -34,7 +34,6 @@ public class VNPayServlet extends HttpServlet {
         
         HttpSession session = request.getSession();
         
-        // Lấy giỏ hàng
         List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
         if (cart == null || cart.isEmpty()) {
             cart = cartDAO.findByUserId(user.getId());
@@ -45,25 +44,20 @@ public class VNPayServlet extends HttpServlet {
             return;
         }
         
-        // Tính tổng tiền
         double total = 0.0;
         for (CartItem item : cart) {
             total += item.getProduct().getPrice() * item.getQuantity();
         }
         
-        // Tạo order ID (sử dụng timestamp)
         String orderId = "ORDER_" + System.currentTimeMillis();
         
-        // Lưu thông tin vào session để sử dụng khi return
         session.setAttribute("vnp_order_id", orderId);
         session.setAttribute("vnp_total_amount", total);
         session.setAttribute("vnp_cart", cart);
         session.setAttribute("vnp_user_id", user.getId());
         
-        // Lấy IP client
         String ipAddr = getClientIP(request);
         
-        // Tạo URL thanh toán
         String paymentUrl = VNPayConfig.createPaymentUrl(
             (long) total,
             orderId,

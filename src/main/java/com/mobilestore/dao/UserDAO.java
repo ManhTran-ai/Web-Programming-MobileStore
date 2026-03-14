@@ -10,11 +10,9 @@ import java.util.List;
 public class UserDAO {
     
     public User findByUsername(String username) {
-        String sql = "SELECT u.id, u.username, u.password, u.role_name, r.description as role_description, " +
-                     "u.oauth_provider, u.oauth_id, u.email " +
-                     "FROM users u " +
-                     "LEFT JOIN roles r ON u.role_name = r.name " +
-                     "WHERE u.username = ?";
+        String sql = "SELECT id, username, password, role_name, oauth_provider, oauth_id, email " +
+                     "FROM users " +
+                     "WHERE username = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -34,11 +32,9 @@ public class UserDAO {
     }
     
     public User findById(Integer id) {
-        String sql = "SELECT u.id, u.username, u.password, u.role_name, r.description as role_description, " +
-                     "u.oauth_provider, u.oauth_id, u.email " +
-                     "FROM users u " +
-                     "LEFT JOIN roles r ON u.role_name = r.name " +
-                     "WHERE u.id = ?";
+        String sql = "SELECT id, username, password, role_name, oauth_provider, oauth_id, email " +
+                     "FROM users " +
+                     "WHERE id = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -59,10 +55,8 @@ public class UserDAO {
     
     public List<User> findAll() {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT u.id, u.username, u.password, u.role_name, r.description as role_description, " +
-                     "u.oauth_provider, u.oauth_id, u.email " +
-                     "FROM users u " +
-                     "LEFT JOIN roles r ON u.role_name = r.name";
+        String sql = "SELECT id, username, password, role_name, oauth_provider, oauth_id, email " +
+                     "FROM users";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -86,7 +80,7 @@ public class UserDAO {
             
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPassword());
-            ps.setString(3, user.getRole() != null ? user.getRole().getName() : null);
+            ps.setString(3, "CUSTOMER");
             
             int affectedRows = ps.executeUpdate();
             
@@ -113,7 +107,7 @@ public class UserDAO {
             
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPassword());
-            ps.setString(3, user.getRole() != null ? user.getRole().getName() : null);
+            ps.setString(3, user.getRoleName() != null ? user.getRoleName() : "CUSTOMER");
             ps.setInt(4, user.getId());
             
             int affectedRows = ps.executeUpdate();
@@ -146,15 +140,7 @@ public class UserDAO {
         user.setId(rs.getInt("id"));
         user.setUsername(rs.getString("username"));
         user.setPassword(rs.getString("password"));
-        
-        String roleName = rs.getString("role_name");
-        if (roleName != null) {
-            com.mobilestore.entity.Role role = new com.mobilestore.entity.Role();
-            role.setName(roleName);
-            role.setDescription(rs.getString("role_description"));
-            user.setRole(role);
-        }
-        
+        user.setRoleName(rs.getString("role_name"));
         user.setOauthProvider(rs.getString("oauth_provider"));
         user.setOauthId(rs.getString("oauth_id"));
         user.setEmail(rs.getString("email"));
@@ -163,11 +149,9 @@ public class UserDAO {
     }
     
     public User findByOauthId(String oauthId, String oauthProvider) {
-        String sql = "SELECT u.id, u.username, u.password, u.role_name, r.description as role_description, " +
-                     "u.oauth_provider, u.oauth_id, u.email " +
-                     "FROM users u " +
-                     "LEFT JOIN roles r ON u.role_name = r.name " +
-                     "WHERE u.oauth_id = ? AND u.oauth_provider = ?";
+        String sql = "SELECT id, username, password, role_name, oauth_provider, oauth_id, email " +
+                     "FROM users " +
+                     "WHERE oauth_id = ? AND oauth_provider = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -195,7 +179,7 @@ public class UserDAO {
             
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPassword() != null ? user.getPassword() : null);
-            ps.setString(3, user.getRole() != null ? user.getRole().getName() : "CUSTOMER");
+            ps.setString(3, user.getRoleName() != null ? user.getRoleName(): "CUSTOMER");
             ps.setString(4, user.getOauthProvider());
             ps.setString(5, user.getOauthId());
             ps.setString(6, user.getEmail());

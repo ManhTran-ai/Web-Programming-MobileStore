@@ -120,10 +120,10 @@ public class ProductsServlet extends HttpServlet {
             }
 
             List<Product> relatedProducts = new ArrayList<>();
-            if (product.getCategory() != null && product.getCategory().getId() != null) {
-                relatedProducts = productDAO.findByCategory(product.getCategory().getId())
+            if (product.getCategory() != null && product.getCategory().getCategoryId() != null) {
+                relatedProducts = productDAO.findByCategory(product.getCategory().getCategoryId())
                     .stream()
-                    .filter(p -> !p.getId().equals(product.getId()))
+                    .filter(p -> !p.getProductId().equals(product.getProductId()))
                     .limit(10)
                     .toList();
             }

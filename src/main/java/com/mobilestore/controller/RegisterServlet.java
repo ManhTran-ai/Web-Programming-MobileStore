@@ -1,7 +1,6 @@
 package com.mobilestore.controller;
 
 import com.mobilestore.entity.User;
-import com.mobilestore.entity.Role;
 import com.mobilestore.dao.UserDAO;
 import com.mobilestore.util.PasswordUtil;
 import jakarta.servlet.ServletException;
@@ -61,10 +60,8 @@ public class RegisterServlet extends HttpServlet {
         
         String hashedPassword = PasswordUtil.hashPassword(password);
         newUser.setPassword(hashedPassword);
-        
-        Role customerRole = new Role();
-        customerRole.setName("CUSTOMER");
-        newUser.setRole(customerRole);
+
+        newUser.setRoleName("CUSTOMER");
 
         User createdUser = userDAO.create(newUser);
         

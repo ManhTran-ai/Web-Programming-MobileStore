@@ -21,7 +21,7 @@ public class OrderDAO {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Order o = new Order();
-                o.setId(rs.getInt("order_id"));
+                o.setOrderId(rs.getInt("order_id"));
                 o.setOrderStatus(rs.getString("order_status"));
                 Timestamp ts = rs.getTimestamp("order_date");
                 if (ts != null) {
@@ -53,7 +53,7 @@ public class OrderDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Order o = new Order();
-                    o.setId(rs.getInt("order_id"));
+                    o.setOrderId(rs.getInt("order_id"));
                     o.setOrderStatus(rs.getString("order_status"));
                     Timestamp ts = rs.getTimestamp("order_date");
                     if (ts != null) {
@@ -92,7 +92,7 @@ public class OrderDAO {
                     od.setPrice(rs.getDouble("price"));
                     od.setQuantity(rs.getInt("quantity"));
                     Product p = new Product();
-                    p.setId(rs.getInt("product_id"));
+                    p.setProductId(rs.getInt("product_id"));
                     p.setProductName(rs.getString("product_name"));
                     od.setProduct(p);
                     list.add(od);
@@ -168,11 +168,11 @@ public class OrderDAO {
                                 psDetail.setDouble(1, item.getProduct().getPrice());
                                 psDetail.setInt(2, item.getQuantity());
                                 psDetail.setInt(3, orderId);
-                                psDetail.setInt(4, item.getProduct().getId());
+                                psDetail.setInt(4, item.getProduct().getProductId());
                                 psDetail.addBatch();
 
                                 psUpdateProduct.setInt(1, item.getQuantity());
-                                psUpdateProduct.setInt(2, item.getProduct().getId());
+                                psUpdateProduct.setInt(2, item.getProduct().getProductId());
                                 psUpdateProduct.addBatch();
                             }
                             psDetail.executeBatch();
@@ -226,11 +226,11 @@ public class OrderDAO {
                                 psDetail.setDouble(1, item.getProduct().getPrice());
                                 psDetail.setInt(2, item.getQuantity());
                                 psDetail.setInt(3, orderId);
-                                psDetail.setInt(4, item.getProduct().getId());
+                                psDetail.setInt(4, item.getProduct().getProductId());
                                 psDetail.addBatch();
 
                                 psUpdateProduct.setInt(1, item.getQuantity());
-                                psUpdateProduct.setInt(2, item.getProduct().getId());
+                                psUpdateProduct.setInt(2, item.getProduct().getProductId());
                                 psUpdateProduct.addBatch();
                             }
                             psDetail.executeBatch();

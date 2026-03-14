@@ -6,9 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 
-/**
- * Cart entity - POJO class không sử dụng JPA annotations
- */
 @Getter
 @Setter
 @NoArgsConstructor

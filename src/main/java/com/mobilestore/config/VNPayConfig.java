@@ -8,13 +8,11 @@ import java.util.*;
 
 public class VNPayConfig {
     
-    // Thông tin từ VNPay Sandbox
     public static String vnp_TmnCode = "J6JEUX7V";
     public static String vnp_HashSecret = "JXJUPG6Y7Z7SZYQ0S9LP3YXLQ7R3RP2H";
     public static String vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     public static String vnp_ReturnUrl = "http://localhost:8080/mobilestore/vnpay_return.jsp";
     
-    // Hàm tạo HMAC-SHA512 đúng chuẩn
     public static String hmacSHA512(String key, String data) {
         try {
             Mac hmac = Mac.getInstance("HmacSHA512");
@@ -31,7 +29,6 @@ public class VNPayConfig {
         }
     }
     
-    // Tạo URL thanh toán
     public static String createPaymentUrl(long amount, String orderId, String orderInfo, String ipAddr) {
         Map<String, String> params = new TreeMap<>();
         params.put("vnp_Amount", String.valueOf(amount * 100)); // VNPay yêu cầu * 100
@@ -47,7 +44,6 @@ public class VNPayConfig {
         params.put("vnp_TxnRef", orderId);
         params.put("vnp_Version", "2.1.0");
         
-        // Tạo query string (đã được sort bởi TreeMap)
         StringBuilder query = new StringBuilder();
         for (Map.Entry<String, String> entry : params.entrySet()) {
             query.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
@@ -57,22 +53,18 @@ public class VNPayConfig {
         }
         String queryString = query.toString().substring(0, query.length() - 1);
         
-        // Tạo secure hash HMAC-SHA512
         String vnp_SecureHash = hmacSHA512(vnp_HashSecret, queryString);
         
         return vnp_Url + "?" + queryString + "&vnp_SecureHash=" + vnp_SecureHash;
     }
     
-    // Kiểm tra checksum từ VNPay return
     public static boolean verifyReturnUrl(Map<String, String> params) {
         String vnp_SecureHash = params.get("vnp_SecureHash");
         if (vnp_SecureHash == null) return false;
         
-        // Loại bỏ vnp_SecureHash và sort theo thứ tự alphabet
         Map<String, String> sortedParams = new TreeMap<>(params);
         sortedParams.remove("vnp_SecureHash");
         
-        // Tạo query string để hash
         StringBuilder query = new StringBuilder();
         for (Map.Entry<String, String> entry : sortedParams.entrySet()) {
             query.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));

@@ -7,7 +7,6 @@
 <%@ page import="com.mobilestore.entity.*" %>
 <%@ page import="java.util.*" %>
 <%
-    // Lấy tất cả tham số từ VNPay
     Map<String, String> params = new HashMap<>();
     Enumeration<String> paramNames = request.getParameterNames();
     while (paramNames.hasMoreElements()) {
@@ -15,7 +14,6 @@
         params.put(paramName, request.getParameter(paramName));
     }
 
-    // Kiểm tra checksum
     boolean isValid = VNPayConfig.verifyReturnUrl(params);
     
     String vnp_ResponseCode = request.getParameter("vnp_ResponseCode");
@@ -28,7 +26,6 @@
     Integer orderId = null;
     
     if (isValid && "00".equals(vnp_ResponseCode)) {
-        // Thanh toán thành công
         Double totalAmount = (Double) sessionObj.getAttribute("vnp_total_amount");
         List<CartItem> cart = (List<CartItem>) sessionObj.getAttribute("vnp_cart");
         Integer userId = (Integer) sessionObj.getAttribute("vnp_user_id");
@@ -44,7 +41,6 @@
             );
             
             if (orderId != null) {
-                // Xóa giỏ hàng
                 CartDAO cartDAO = new CartDAO();
                 cartDAO.clearCartByUser(userId);
                 sessionObj.removeAttribute("cart");
@@ -58,7 +54,6 @@
         errorMessage = "Thanh toán thất bại. Mã lỗi: " + vnp_ResponseCode;
     }
     
-    // Xóa các session attribute tạm
     sessionObj.removeAttribute("vnp_order_id");
     sessionObj.removeAttribute("vnp_total_amount");
     sessionObj.removeAttribute("vnp_cart");

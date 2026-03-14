@@ -17,7 +17,6 @@
 
     Carousel.prototype.update = function () {
         if (!this.track) return;
-        // Use percentage-based translate for responsiveness
         this.track.style.transform = 'translateX(-' + (this.currentIndex * 100) + '%)';
         this.updateDots();
     };
@@ -72,7 +71,6 @@
                 e.stopPropagation();
                 this.carouselRef.goTo(idx);
             }.bind(btn), false);
-            // store reference to carousel instance for handler
             btn.carouselRef = this;
             this.dotsContainer.appendChild(btn);
         }
@@ -90,12 +88,10 @@
             this.container.addEventListener('mouseenter', function () { self.stopAutoPlay(); });
             this.container.addEventListener('mouseleave', function () { self.startAutoPlay(); });
         }
-        // keyboard navigation
         document.addEventListener('keydown', function (e) {
             if (e.key === 'ArrowLeft') self.prev();
             if (e.key === 'ArrowRight') self.next();
         });
-        // handle resize to re-apply transform cleanly
         window.addEventListener('resize', function () { self.update(); });
     };
 
@@ -109,13 +105,11 @@
         }
     };
 
-    // Auto-init for the hero carousel container
     document.addEventListener('DOMContentLoaded', function () {
         var hero = document.querySelector('.carousel-container');
         if (hero) {
             var c = new Carousel('.carousel-container', { interval: 4000, pauseOnHover: true });
             c.init();
-            // expose for debugging if needed
             window.__heroCarousel = c;
         }
     });

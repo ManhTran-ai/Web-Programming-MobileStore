@@ -27,11 +27,24 @@ public class CheckoutServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login?redirect=" + request.getRequestURI());
             return;
         }
-        List<CartItem> cart = (List<CartItem>) request.getSession().getAttribute("cart");
+        
+        List<CartItem> cart = null;
+        Object cartObj = request.getSession().getAttribute("cart");
+        if (cartObj instanceof List) {
+            cart = (List<CartItem>) cartObj;
+        }
+        
         if (cart == null || cart.isEmpty()) {
             cart = cartDAO.findByUserId(user.getId());
-            request.getSession().setAttribute("cart", cart);
+            if (cart != null && !cart.isEmpty()) {
+                request.getSession().setAttribute("cart", cart);
+            }
         }
+        
+        if (cart == null) {
+            cart = new java.util.ArrayList<>();
+        }
+        
         request.setAttribute("cartItems", cart);
         request.getRequestDispatcher("/views/products/checkout.jsp").forward(request, response);
     }
@@ -44,10 +57,21 @@ public class CheckoutServlet extends HttpServlet {
             return;
         }
 
-        List<CartItem> cart = (List<CartItem>) request.getSession().getAttribute("cart");
+        List<CartItem> cart = null;
+        Object cartObj = request.getSession().getAttribute("cart");
+        if (cartObj instanceof List) {
+            cart = (List<CartItem>) cartObj;
+        }
+        
         if (cart == null || cart.isEmpty()) {
             cart = cartDAO.findByUserId(user.getId());
         }
+        
+        if (cart == null || cart.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/cart?error=Giỏ hàng trống");
+            return;
+        }
+        
         double total = 0.0;
         for (CartItem it : cart) total += it.getProduct().getPrice() * it.getQuantity();
 

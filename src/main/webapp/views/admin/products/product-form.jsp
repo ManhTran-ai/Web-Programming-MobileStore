@@ -25,7 +25,6 @@
             min-height: 100vh;
         }
 
-        /* Sidebar */
         .sidebar {
             width: 260px;
             background: #1a1a1a;
@@ -86,7 +85,6 @@
             font-size: 1.1rem;
         }
 
-        /* Main Content */
         .main-content {
             flex: 1;
             margin-left: 260px;
@@ -127,7 +125,6 @@
             color: #888;
         }
 
-        /* Form Card */
         .form-card {
             background: #ffffff;
             border-radius: 12px;
@@ -200,7 +197,6 @@
             padding-right: 2.5rem;
         }
 
-        /* Validation Feedback */
         .invalid-feedback {
             display: none;
             color: #ff3b30;
@@ -220,7 +216,6 @@
             margin-top: 0.375rem;
         }
 
-        /* Character Counter */
         .char-counter {
             font-size: 0.8rem;
             color: #888;
@@ -236,7 +231,6 @@
             color: #ff3b30;
         }
 
-        /* File Input */
         .file-input-wrapper {
             position: relative;
         }
@@ -340,7 +334,6 @@
             margin-top: 0.5rem;
         }
 
-        /* Buttons */
         .form-actions {
             display: flex;
             gap: 1rem;
@@ -387,7 +380,6 @@
             background: #d1d1d6;
         }
 
-        /* Loading Spinner */
         .spinner {
             display: none;
             width: 20px;
@@ -411,7 +403,6 @@
             margin-left: 8px;
         }
 
-        /* Alert */
         .alert {
             padding: 1rem 1.5rem;
             border-radius: 8px;
@@ -430,14 +421,12 @@
             padding: 0;
         }
 
-        /* Help text */
         .help-text {
             font-size: 0.85rem;
             color: #888;
             margin-top: 0.375rem;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -455,7 +444,6 @@
 </head>
 <body>
     <div class="admin-container">
-        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Mobile Store</h2>
@@ -473,7 +461,6 @@
                             Sản phẩm
                         </a>
                     </li>
-                    <!-- Categories menu removed -->
                     <li>
                         <a href="${pageContext.request.contextPath}/admin/orders">
                             Đơn hàng
@@ -483,7 +470,6 @@
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
             <div class="breadcrumb">
                 <a href="${pageContext.request.contextPath}/admin/products">Sản phẩm</a>
@@ -495,7 +481,6 @@
                 <h1>${isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm mới'}</h1>
             </div>
 
-            <!-- Error Messages from Server -->
             <c:if test="${not empty error}">
                 <div class="alert alert-error" id="serverError">
                     <strong>✕ Lỗi:</strong>
@@ -514,13 +499,11 @@
                 </div>
             </c:if>
 
-            <!-- Client-side Error Container -->
             <div class="alert alert-error" id="clientErrors" style="display: none;">
                 <strong>✕ Vui lòng sửa các lỗi sau:</strong>
                 <ul id="errorList"></ul>
             </div>
 
-            <!-- Product Form -->
             <div class="form-card">
                 <form action="${pageContext.request.contextPath}/admin/products/${isEdit ? 'edit' : 'add'}"
                       method="post"
@@ -529,7 +512,7 @@
                       novalidate>
 
                     <c:if test="${isEdit}">
-                        <input type="hidden" name="id" value="${product.id}">
+                        <input type="hidden" name="id" value="${product.productId}">
                     </c:if>
 
                     <div class="form-row">
@@ -611,9 +594,9 @@
                             <select id="categoryId" name="categoryId" class="form-control" required>
                                 <option value="">-- Chọn danh mục --</option>
                                 <c:forEach var="category" items="${categories}">
-                                    <option value="${category.id}"
-                                            ${product.category.id == category.id ? 'selected' : ''}>
-                                        ${category.name}
+                                    <option value="${category.categoryId}"
+                                            ${product.category.categoryId == category.categoryId ? 'selected' : ''}>
+                                        ${category.categoryName}
                                     </option>
                                 </c:forEach>
                             </select>
@@ -706,9 +689,8 @@
     </div>
 
     <script>
-        // ==================== Configuration ====================
         const CONFIG = {
-            maxFileSize: 10 * 1024 * 1024, // 10MB
+            maxFileSize: 10 * 1024 * 1024,
             allowedExtensions: ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
             allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
             maxProductNameLength: 255,
@@ -717,13 +699,11 @@
             maxQuantity: 99999
         };
 
-        // ==================== DOM Elements ====================
         const form = document.getElementById('productForm');
         const submitBtn = document.getElementById('submitBtn');
         const clientErrorsDiv = document.getElementById('clientErrors');
         const errorList = document.getElementById('errorList');
 
-        // Form fields
         const productNameInput = document.getElementById('productName');
         const manufacturerInput = document.getElementById('manufacturer');
         const priceInput = document.getElementById('price');
@@ -734,8 +714,6 @@
         const fileInputDisplay = document.getElementById('fileInputDisplay');
         const imagePreview = document.getElementById('imagePreview');
         const removeImageBtn = document.getElementById('removeImageBtn');
-
-        // ==================== Validation Functions ====================
 
         function validateProductName() {
             const value = productNameInput.value.trim();
@@ -834,13 +812,11 @@
             const newCategoryVal = newCategoryInput ? newCategoryInput.value.trim() : '';
             const errorEl = document.getElementById('categoryError');
 
-            // If either a selected category or a new category name is provided, it's valid
             if ((!value || value.trim() === '') && newCategoryVal === '') {
                 setInvalid(categorySelect, errorEl, 'Vui lòng chọn danh mục hoặc nhập danh mục mới');
                 return false;
             }
 
-            // Show valid state (for UX we mark the select as valid; new category input stays untouched)
             setValid(categorySelect);
             return true;
         }
@@ -850,18 +826,15 @@
             const errorEl = document.getElementById('imageError');
 
             if (!file) {
-                // File is optional
                 fileInputDisplay.classList.remove('is-invalid');
                 return true;
             }
 
-            // Check file size
             if (file.size > CONFIG.maxFileSize) {
                 setInvalidFile(errorEl, 'Kích thước file không được vượt quá 10MB');
                 return false;
             }
 
-            // Check file extension
             const fileName = file.name.toLowerCase();
             const extension = '.' + fileName.split('.').pop();
             if (!CONFIG.allowedExtensions.includes(extension)) {
@@ -869,7 +842,6 @@
                 return false;
             }
 
-            // Check MIME type
             if (!CONFIG.allowedMimeTypes.includes(file.type)) {
                 setInvalidFile(errorEl, 'Loại file không hợp lệ. Chỉ chấp nhận file ảnh.');
                 return false;
@@ -879,8 +851,6 @@
             errorEl.style.display = 'none';
             return true;
         }
-
-        // ==================== Helper Functions ====================
 
         function setInvalid(input, errorEl, message) {
             input.classList.add('is-invalid');
@@ -892,14 +862,12 @@
         function setValid(input) {
             input.classList.remove('is-invalid');
             input.classList.add('is-valid');
-            // Hide related invalid-feedback element if present
             try {
                 var next = input.nextElementSibling;
                 if (next && next.classList && next.classList.contains('invalid-feedback')) {
                     next.style.display = 'none';
                 }
             } catch (e) {
-                // ignore
             }
         }
 
@@ -950,8 +918,6 @@
             }
         }
 
-        // ==================== Image Preview ====================
-
         function previewImage(file) {
             if (file) {
                 const reader = new FileReader();
@@ -974,9 +940,6 @@
             fileInputDisplay.classList.remove('is-invalid');
         }
 
-        // ==================== Event Listeners ====================
-
-        // Real-time validation
         productNameInput.addEventListener('input', function() {
             validateProductName();
             updateCharCounter(this, 'productNameCount', CONFIG.maxProductNameLength);
@@ -991,14 +954,12 @@
             updateCharCounter(this, 'productInfoCount', CONFIG.maxProductInfoLength);
         });
 
-        // Blur validation
         productNameInput.addEventListener('blur', validateProductName);
         manufacturerInput.addEventListener('blur', validateManufacturer);
         priceInput.addEventListener('blur', validatePrice);
         quantityInput.addEventListener('blur', validateQuantity);
         categorySelect.addEventListener('blur', validateCategory);
 
-        // Image handling
         imageInput.addEventListener('change', function() {
             if (validateImage()) {
                 previewImage(this.files[0]);
@@ -1007,7 +968,6 @@
 
         removeImageBtn.addEventListener('click', clearImagePreview);
 
-        // Drag and drop
         fileInputDisplay.addEventListener('dragover', function(e) {
             e.preventDefault();
             this.classList.add('drag-over');
@@ -1031,12 +991,10 @@
             }
         });
 
-        // Form submission
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             hideClientErrors();
 
-            // Run all validations
             const errors = [];
 
             if (!validateProductName()) {
@@ -1058,7 +1016,6 @@
                 errors.push('Hình ảnh: ' + document.getElementById('imageError').textContent);
             }
 
-            // If new category name provided, basic client validation
             const newCategoryInput = document.getElementById('newCategoryName');
             if (newCategoryInput && newCategoryInput.value.trim().length > 255) {
                 errors.push('Danh mục mới: Tên không được vượt quá 255 ký tự');
@@ -1069,12 +1026,10 @@
                 return false;
             }
 
-            // All validations passed, submit form
             setLoading(true);
             form.submit();
         });
 
-        // Toggle: if typing new category, disable select; if select changed, clear new category
         const newCategoryInput = document.getElementById('newCategoryName');
         const categorySelectEl = document.getElementById('categoryId');
         if (newCategoryInput) {
@@ -1095,7 +1050,6 @@
             });
         }
 
-        // Initialize counters
         updateCharCounter(productNameInput, 'productNameCount', CONFIG.maxProductNameLength);
         updateCharCounter(productInfoInput, 'productInfoCount', CONFIG.maxProductInfoLength);
     </script>
